@@ -1,5 +1,5 @@
 # FinFrank
-cd FinFrank
+cd FinFrank (2 razy /FinFrank/FinFrank)
 
 python manage.py makemigrations
 
