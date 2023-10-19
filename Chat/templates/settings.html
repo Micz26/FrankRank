@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Global styles */
+    /* ... existing styles ... */
+
+    /* Section title styles */
+    .section-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    /* Form container styles */
+    .form-container {
+        /* Define styles for the form container here */
+    }
+
+    /* Form group styles */
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    /* Input field styles */
+    .input-field {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 25%;
+    }
+
+    /* Submit button styles */
+    .submit-button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    /* Back link styles */
+    .back-link {
+        color: #007bff;
+        text-decoration: none;
+        margin-top: 10px;
+        display: block;
+    }
+</style>
+<p class="section-title">Update your profile:</p>
+<div class="form-container">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="investments">Investments (Obligacje, Indeksy ETF):</label>
+            <input type="text" name="investments" id="investments" value="{{ user_profile.investments }}" class="input-field">
+        </div>
+
+        <div class="form-group">
+            <label for="sectors">Sektory Inwestycji:</label>
+            <input type="text" name="sectors" id="sectors" value="{{ user_profile.sectors }}" class="input-field">
+        </div>
+
+        <div class="form-group">
+            <label for="risk_level">Poziom Ryzyka:</label>
+            <input type="text" name="risk_level" id="risk_level" value="{{ user_profile.risk_level }}" class="input-field">
+        </div>
+
+        <div class="form-group">
+            <label for="expected_annual_return">Oczekiwany Roczny Zwrot:</label>
+            <input type="text" name="expected_annual_return" id="expected_annual_return" value="{{ user_profile.expected_annual_return }}" class="input-field">
+        </div>
+
+        <div class="form-group">
+            <label for="investment_period">Okres Czasowy:</label>
+            <input type="text" name="investment_period" id="investment_period" value="{{ user_profile.investment_period }}" class="input-field">
+        </div>
+
+        <div class="form-group">
+            <label for="esg">ESG:</label>
+            <input type="text" name="esg" id="esg" value="{{ user_profile.esg }}" class="input-field">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="submit-button">Save Changes</button>
+        </div>
+    </form>
+
+    <a href="/" class="back-link">Home</a>
+</div>
+{% endblock %}

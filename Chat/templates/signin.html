@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Global styles */
+    /* ... existing styles ... */
+
+    /* Form container styles */
+    .form-container {
+        /* Define styles for the form container here */
+    }
+
+    /* Form group styles */
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    /* Input field styles */
+    .input-field {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 25%;
+    }
+
+    /* Submit button styles */
+    .submit-button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    /* Message container styles */
+    .message-container {
+        /* Define styles for the message container here */
+    }
+</style>
+<form method="post" class="form-container">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required class="input-field">
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required class="input-field">
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Sign In" class="submit-button">
+    </div>
+    <p class="text-base">You do not have an account yet? <a href="/signup">Sign up</a></p>
+</form>
+{% if messages %}
+<div class="message-container">
+    {% for message in messages %}
+    <p>{{ message }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+

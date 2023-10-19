@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Global styles */
+    /* ... existing styles ... */
+
+    /* Message container styles */
+    .message-container {
+        /* Define styles for the message container here */
+    }
+
+    /* Section title styles */
+    .section-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    /* Chart container styles */
+    .chart-container {
+        background-color: #007bff;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+</style>
+
+    {% if messages %}
+    <div class="message-container">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if plot_div %}
+    <p class="section-title">Chart for <a href="/chart/{{stock_id}}">{{ stock }}</a></p>
+    <div class="chart-container">
+        {{ plot_div | safe }}
+    </div>
+    {% endif %}
+{% endblock %}
+

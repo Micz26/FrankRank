@@ -1,0 +1,43 @@
+{% block content %}
+<div class="user-actions">
+    <a href="/settings"> Settings</a>
+</div>
+<div class="user-actions">
+    <a href="logout"> Log out</a>
+</div>
+<div>
+    <div class="prompt-field">
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" name="prompt" placeholder="...">
+            <button type="submit"><i class="fa fa-search fa-1x"></i></button>
+        </form>
+    </div>
+</div>
+    {% if messages_ %}
+    <div class="message-container">
+        {% for message in messages_ %}
+          <div class="alert alert-danger" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if reply_content %}
+        <div class="alert alert-success" role="alert">
+          {{ reply_content }}
+        </div>
+    {% endif %}
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+

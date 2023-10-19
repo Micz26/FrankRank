@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Global styles */
+    /* ... existing styles ... */
+
+    /* Section title styles */
+    h1 {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    /* Message container styles */
+    .message-container {
+        /* Define styles for the message container here */
+    }
+
+    /* Flex container styles */
+    .flex {
+        display: flex;
+    }
+
+    .space-x-4 {
+        margin-right: 1rem;
+    }
+
+    .lg\:font-bold {
+        font-weight: bold;
+    }
+
+    /* Form container styles */
+    .form-container {
+        /* Define styles for the form container here */
+    }
+
+    /* Form group styles */
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    /* Input field styles */
+    .input-field {
+        padding: 9px;
+        border: 1px solid #000;
+        border-radius: 20px 20px 20px 20px;
+        background-color: #333;
+        color: #fff;
+        width: 98.5%;
+    }
+
+    /* Button styles */
+    button[type="submit"] {
+        border: none;
+        background-color: #007bff;
+        color: #fff;
+        padding: 15px 20px;
+        border-radius: 20px 20px 20px 20px;
+        cursor: pointer;
+        height: 32px;
+        width: 100%;
+        display: inline-block;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+        background-color: white;
+        color: #007bff;
+    }
+
+        .follow-button {
+        display: inline-block;
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+    }
+
+    .follow-button:hover {
+        background-color: white;
+        color: #007bff;
+    }
+
+    .chart-container {
+        background-color: #007bff;
+        padding: 7px;
+        padding-right: 20px;
+        border-radius: 10px;
+        margin: 10px auto;
+        width: 80%;
+    }
+
+    /* Table styles */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    table, th, td {
+        border: 1px solid #ccc;
+    }
+
+    th, td {
+        padding: 8px;
+        text-align: left;
+    }
+</style>
+
+<h1>
+    Stock Detail
+    <a href="/follow-chart/{{stock_id}}" class="flex items-center space-x-2">
+        <button class="follow-button">{{button_text}} this Stock</button>
+    </a>
+</h1>
+{% if messages %}
+<div class="message-container">
+    {% for message in messages %}
+    <p>{{ message }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+<form action="/chart/{{stock_id}}" method="POST" class="form-container">
+    {% csrf_token %}
+    <div class="form-group">
+        <input type="text" name="start-date" placeholder="Start date (YYYY-MM-DD)" class="input-field">
+    </div>
+    <div class="form-group">
+        <input type="text" name="end-date" placeholder="End date (YYYY-MM-DD)" class="input-field">
+    </div>
+    <div class="form-group">
+        <input type="text" name="interval" placeholder="Interval (1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo)" class="input-field">
+    </div>
+    <div class="form-group">
+        <button type="submit" class="submit-button"><i class="fa fa-search fa-1x"></i>Create chart</button>
+    </div>
+    <p class="note-text">Note: The 1m data is only retrievable for the last 7 days, and intraday data (interval &lt; 1d) is only retrievable for the last 60 days.</p>
+</form>
+
+<div class="chart-container">
+    {{ plot_div | safe }}
+</div>
+
+<h2>Stock Information</h2>
+<ul>
+    {% for key, value in stock_info %}
+    <li><strong>{{ key }}:</strong> {{ value }}</li>
+    {% endfor %}
+</ul>
+
+<h2>Latest Year's Financial Data</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Financial Metric</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for key, value in latest_year_data.items %}
+        <tr>
+            <td>{{ key }}</td>
+            <td>{{ value }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Key Ratios</h2>
+<table>
+<thead>
+    <tr>
+        <th>Ratio</th>
+        <th>Value</th>
+    </tr>
+</thead>
+<tbody>
+    {% for key, value in key_ratios_df.iterrows %}
+    <tr>
+        <td>{{ key }}</td>
+        <td>{{ value }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+
+{% endblock %}
+
+

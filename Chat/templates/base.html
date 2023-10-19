@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>StockCharts</title>
+    <style>
+        /* Global styles */
+        body {
+            background-color: #333; /* Changed background color to gray */
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header styles */
+        .header {
+            background-color: #0000FF;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .header a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        /* Navigation styles */
+        .navigation {
+            text-align: right;
+        }
+
+        /* Content container styles */
+        .content-container {
+            padding: 20px;
+            background-color: #333; /* Changed background color to gray */
+            border-radius: 0 0 10px 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a>Welcome to StockCharts</a>
+        <div class="navigation">
+            <a>Home</a>
+            <a>About</a>
+            <a>Contact</a>
+        </div>
+    </div>
+    <div class="content-container">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>
+
+
