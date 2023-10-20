@@ -58,7 +58,7 @@ def logout(request):
 def home(request):
     messages_ = []
     reply_content = ''
-    openai.api_key = open("C:\\Users\\mikol\\OneDrive\\Dokumenty\\key.txt", "r").read().strip("\n")
+    openai.api_key = "zzz"
 
     if request.method == "POST":
         prompt = request.POST["prompt"]
