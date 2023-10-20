@@ -58,7 +58,7 @@ def logout(request):
 def home(request):
     messages_ = []
     reply_content = ''
-    openai.api_key = "zzz"
+    openai.api_key = "VtC5eWqNZyxpNBYxXnl7T3BlbkFJDHGwZZKcZhLf7WVNhJ8X"
 
     if request.method == "POST":
         prompt = request.POST["prompt"]

@@ -1,25 +1,28 @@
-<!DOCTYPE html>
 <html>
-<head>
-    <title>FranRank</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+    <head>
+        <title>FranRank</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
 
-</head>
+    </head>
 <body>
-    <div class="header">
-        <a>Welcome to StockCharts</a>
-        <div class="navigation">
-            <a>Home</a>
-            <a>About</a>
-            <a>Contact</a>
+    <div class="ui fixed inverted menu">
+        <div class="ui container">
+            <a href="#" class="header item"><h1>FinFrank</h1></a>
+            <a href="#" class="right item">Home</a>
+            <a href="#" class="item">About</a>
+            <a href="#" class="item">Contact</a>
         </div>
     </div>
-    <div class="content-container">
+    <div class="ui divider"></div>
+    <h1>   </h1>
+    <div class="ui container">
         {% block content %}
         {% endblock %}
+    
     </div>
+
 </body>
 </html>
 

@@ -1,19 +1,19 @@
+{% extends "base.html" %}
 {% block content %}
-<div class="user-actions">
-    <a href="/settings"> Settings</a>
-</div>
-<div class="user-actions">
-    <a href="logout"> Log out</a>
-</div>
-<div>
-    <div class="prompt-field">
-        <form method="POST">
-            {% csrf_token %}
-            <input type="text" name="prompt" placeholder="...">
-            <button type="submit"><i class="fa fa-search fa-1x"></i></button>
-        </form>
-    </div>
-</div>
+
+<div class="ui buttons">
+    <a href="/settings">
+        <button class="ui button" >Settings</button>
+    </a>
+    
+    <a href="/logout">
+        <button class="ui button">Log out</button>
+    </a>
+  </div>
+
+
+
+<div class="ui segment">
     {% if messages_ %}
     <div class="message-container">
         {% for message in messages_ %}
@@ -29,6 +29,21 @@
           {{ reply_content }}
         </div>
     {% endif %}
+</div>
+
+<div class="ui form">
+    <div class="prompt-field">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="ui fluid action input">
+                <input type="text" name="prompt" placeholder="prompt" class="ui input">
+                <button type="submit" class="ui button">Click to send prompt<i></i></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 {% endblock %}
 
 
