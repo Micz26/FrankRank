@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Profile
-import openai
+
+
+from .gpt import ChatConversation
+from .models import Profile, ChatInfo
 import json
 
 def signup(request):
@@ -12,13 +14,16 @@ def signup(request):
         email = request.POST['email']
         password = request.POST['password']
         password2 = request.POST['password2']
+        
         if password2 == password:
             if User.objects.filter(email=email).exists():
                 messages.info(request, 'Ten email jest zajęty')
                 return  redirect('signup')
+            
             elif User.objects.filter(username=username).exists():
                 messages.info(request, 'Nazwa użytkownia jest zajęta')
                 return redirect('signup')
+            
             else:
                 user = User.objects.create_user(username=username, email=email, password=password)
                 user.save()
@@ -32,6 +37,7 @@ def signup(request):
         else:
             messages.info(request, 'Hasła nie są takie same')
             return redirect('signup')
+        
     else:
         return render(request, 'signup.html')
 
@@ -55,26 +61,31 @@ def logout(request):
     auth.logout(request)
     return redirect('signin')
 
+
 def home(request):
     messages_ = []
     reply_content = ''
-    openai.api_key = "VtC5eWqNZyxpNBYxXnl7T3BlbkFJDHGwZZKcZhLf7WVNhJ8X"
+    api_key = "XXX"
+    conversation = ChatConversation("Lukasz", 20, api_key)
+    tempUserID = 2138
 
+    if not ChatInfo.objects.filter(id_user = tempUserID).exists():
+        chatTimeline = conversation.get_gptResponse("Say short hello to user")
+        obj = ChatInfo(id_user = tempUserID, chat = str(chatTimeline), category = "demo")
+        obj.save()
+    
+    conversation.messages = list(eval(ChatInfo.objects.filter(id_user = tempUserID, category = "demo").values("chat").first()["chat"]))
     if request.method == "POST":
         prompt = request.POST["prompt"]
-        try:
-            completion = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": prompt}],
-            )
-
-
-            reply_content = completion.choices[0].message.content
-        except Exception as e:
-            messages_.append(f"An unexpected error occurred: {e}")
+        chatTimeline  = conversation.get_gptResponse(prompt)
+        ChatInfo.objects.filter(id_user = tempUserID, category = "demo").update(chat = str(chatTimeline))
+    
+    
+    messages_ = list(eval(ChatInfo.objects.filter(id_user = tempUserID, category = "demo").values("chat").first()["chat"]))
     context = {'messages_': messages_,
                'reply_content': reply_content
                }
+    
     return render(request, 'home.html', context=context)
 
 def settings(request):

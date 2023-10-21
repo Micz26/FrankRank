@@ -39,3 +39,15 @@ class Profile(models.Model):
         super(Profile, self).save(*args, **kwargs)
     def __str__(self):
         return self.user.username
+    
+    
+class ChatInfo(models.Model):
+    id_user = models.IntegerField()
+    chat = models.TextField()
+    category = models.CharField(max_length=45, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        super(ChatInfo, self).save(*args, **kwargs)
+        
+    def __str__(self):
+        return self.id_user
