@@ -2,30 +2,61 @@
 
 {% block content %}
 
-<div>
-    <form action="" method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required class="input-field">
-        </div>
-        <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required class="input-field">
-        </div>
-        <div class="form-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required class="input-field">
-        </div>
-        <div class="form-group">
-            <label for="password2">Confirm Password:</label>
-            <input type="password" id="password2" name="password2" required class="input-field">
-        </div>
-        <div class="form-group">
-            <button type="submit" class="submit-button">Sign Up</button>
-        </div>
-        <p class="text-base">Already have an account? <a href="/signin">Sign In</a></p>
-    </form>
+<div class="ui segment">
+    <div class = "ui form">
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="field">
+                <div class="form-group">
+                    <div class="ui fluid labeled input">
+                            <a class="ui label" style="width:13%; text-align:center;" for="username">Username</a>
+                            <input type="text" id="username" name="username" required class="input-field">
+                        </div>
+                    </div>
+            </div>
+
+
+            <div class="field">
+                <div class="form-group">
+                    <div class="ui fluid labeled input">
+                        <a class="ui label" style="width:13%; text-align:center;" for="email">Email</a>
+                        <input type="email" id="email" name="email" required class="input-field">
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="form-group">
+                    <div class="ui fluid labeled input">
+                        <a class="ui label" style="width:13%; text-align:center;" for="password">Password</a>
+                        <input type="password" id="password" name="password" required class="input-field">
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="field">
+                <div class="form-group">
+                    <div class="ui fluid labeled input">
+                        <a class="ui label" style="width:13%; text-align:center;" for="password2">Confirm Password</a>
+                        <input type="password" id="password2" name="password2" required class="input-field">
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="field">
+                <div class="form-group">
+                    <button type="submit" class="ui fluid button">Sign Up</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="ui message">
+    <p class="text-base">Already have an account? <a href="/signin">Sign In</a></p>
+</div>
+
     {% if messages %}
     <div class="message-container">
         {% for message in messages %}

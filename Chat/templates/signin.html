@@ -2,22 +2,35 @@
 
 {% block content %}
 
-<form method="post" class="form-container">
-    {% csrf_token %}
-    <div class="form-group">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required class="input-field">
-    </div>
 
-    <div class="form-group">
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required class="input-field">
-    </div>
+<div class="ui middle aligned center aligned grid">
+    <div class="ui large form">
+        <h2 class="ui header">Log-in to your account</h2>
 
-    <div class="form-group">
-        <input type="submit" value="Sign In" class="submit-button">
+        <div class = "ui stacked large segment">
+            <form method="post" class="form-container">
+                {% csrf_token %}
+                <div class = "field">
+                    <div class="form-group">
+                        <input type="text" id="username" name="username" required class="input-field", placeholder="Username">
+                    </div>
+                </div>
+                <div class = "field">
+                    <div class="form-group">
+                        <input type="password" id="password" name="password" required class="input-field" placeholder="Password">
+                    </div>
+                </div>
+                <div class = "field">
+                    <div class="form-group">
+                        <input type="submit" value="Sign In" class="ui fluid large submit button">
+                    </div> 
+                </div>
+        </div>
+        <div class="ui message">
+            <p class="text-base">You do not have an account yet? <a href="/signup">Sign up</a></p>
+        </div>
     </div>
-    <p class="text-base">You do not have an account yet? <a href="/signup">Sign up</a></p>
+</div>
 </form>
 {% if messages %}
 <div class="message-container">

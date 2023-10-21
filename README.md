@@ -10,3 +10,7 @@ python manage.py runserver
 (opcjonalnie)
 
 python manage.py createsuperuser
+
+BAZADANYCH 
+pip install pyodbc
+pip install mssql-django
