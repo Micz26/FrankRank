@@ -66,14 +66,19 @@ def home(request):
     messages_ = []
     reply_content = ''
     api_key = "XXX"
+    
+    # declaring ChatConversation class for gpt
     conversation = ChatConversation("Lukasz", 20, api_key)
     tempUserID = 2138
 
+    #checkig if chat was previously generated and if not generating promt saying hello
     if not ChatInfo.objects.filter(id_user = tempUserID).exists():
         chatTimeline = conversation.get_gptResponse("Say short hello to user")
         obj = ChatInfo(id_user = tempUserID, chat = str(chatTimeline), category = "demo")
         obj.save()
     
+    
+    # must use list(eval(str)) to convert single string to list of dictionaries
     conversation.messages = list(eval(ChatInfo.objects.filter(id_user = tempUserID, category = "demo").values("chat").first()["chat"]))
     if request.method == "POST":
         prompt = request.POST["prompt"]
@@ -82,11 +87,17 @@ def home(request):
     
     
     messages_ = list(eval(ChatInfo.objects.filter(id_user = tempUserID, category = "demo").values("chat").first()["chat"]))
+    
+    """
+        TODO: Format messages_ to HTML styled text, align user on right side of chat and assistant on left
+    """
+    
     context = {'messages_': messages_,
                'reply_content': reply_content
                }
-    
+
     return render(request, 'home.html', context=context)
+
 
 def settings(request):
     user_profile = Profile.objects.get(user=request.user)

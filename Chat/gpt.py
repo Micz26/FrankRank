@@ -1,6 +1,15 @@
 import openai
 
 class ChatConversation:
+    """ Class dedicated for controling chat GPT integration 
+    
+    Attributes:
+        self.userName : user name
+        self.age = age
+        self.messages : list of dictionaries, stores meseges in list, and each message is dictionary containing user and assistant 
+        api_key : openi key provided by user
+
+    """
     def __init__(self, name, age, api_key):
         self.userName = name
         self.age = age
@@ -10,7 +19,15 @@ class ChatConversation:
         openai.api_key  = api_key
     
     
-    def get_gptResponse(self, message):
+    def get_gptResponse(self, message : str) -> list:
+        """ Connect with Chatgpt and generates response
+        
+        Args:
+            message : promt which will be appended to chat timeline and generated response on
+            
+        Returns:
+            self.messages : list of dictionaries
+        """
         
         self.messages.append(
             {"role": "user", "content": message},
