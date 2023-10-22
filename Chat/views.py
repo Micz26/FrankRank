@@ -67,6 +67,8 @@ def home(request):
     reply_content = ''
     api_key = "XXX"
     
+    #TODO : Integrate home function with ORM models
+    
     # declaring ChatConversation class for gpt
     conversation = ChatConversation("Lukasz", 20, api_key)
     tempUserID = 2138
