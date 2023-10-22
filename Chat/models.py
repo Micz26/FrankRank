@@ -7,7 +7,7 @@ import bcrypt
 
 User = get_user_model()
 
-# Hash maila
+# Hash mail
 def hash_email(email):
     hashed_email = bcrypt.hashpw(email.encode('utf-8'), bcrypt.gensalt())
     return hashed_email.decode('utf-8')
@@ -20,12 +20,13 @@ def hash_api_key(api_key):
 
 # Models
 class Profile(models.Model):
+    #to bym zostawił i dodał imie, nazwisko, date urodzenia
     id_user = models.IntegerField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
     email = models.EmailField(unique=True)
     openai_api_key = models.CharField(max_length=255)
-
+    
+    # tutaj zrobiłbym nową tabele z tymi danymi investmetriskprofile albo coś
     investments = models.CharField(max_length=255, blank=True, null=True)
     sectors = models.CharField(max_length=255, blank=True, null=True)
     risk_level = models.CharField(max_length=255, blank=True, null=True)

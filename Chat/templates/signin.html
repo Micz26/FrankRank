@@ -3,11 +3,9 @@
 {% block content %}
 
 
-<div class="ui middle aligned center aligned grid">
+<div class="ui segment">
     <div class="ui large form">
-        <h2 class="ui header">Log-in to your account</h2>
-
-        <div class = "ui stacked large segment">
+        <h2 class="ui center aligned header">Log-in to your account</h2>
             <form method="post" class="form-container">
                 {% csrf_token %}
                 <div class = "field">
@@ -26,19 +24,23 @@
                     </div> 
                 </div>
         </div>
-        <div class="ui message">
-            <p class="text-base">You do not have an account yet? <a href="/signup">Sign up</a></p>
+        {% if messages %}
+        <div class="ui warning message">
+            {% for message in messages %}
+            <p>{{ message }}</p>
+            {% endfor %}
         </div>
+        {% endif %}
+    </div>
+
+    <div class="ui message">
+        <p class="text-base">You do not have an account yet? <a href="/signup">Sign up</a></p>
     </div>
 </div>
+
+
 </form>
-{% if messages %}
-<div class="message-container">
-    {% for message in messages %}
-    <p>{{ message }}</p>
-    {% endfor %}
-</div>
-{% endif %}
+
 {% endblock %}
 
 

@@ -2,6 +2,7 @@ import openai
 
 class ChatConversation:
     """ Class dedicated for controling chat GPT integration 
+    #TODO: Ingerate simple function to chat
     
     Attributes:
         self.userName : user name

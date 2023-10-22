@@ -9,6 +9,9 @@ from .models import Profile, ChatInfo
 import json
 
 def signup(request):
+    
+    #TODO: Sigup with google, github
+    
     if request.method == "POST":
         username = request.POST['username']
         email = request.POST['email']
@@ -42,6 +45,7 @@ def signup(request):
         return render(request, 'signup.html')
 
 def signin(request):
+    #TODO: Sign in with github, google
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
@@ -66,8 +70,12 @@ def home(request):
     messages_ = []
     reply_content = ''
     api_key = "XXX"
+    cat = "demo"
     
+    #TODO : Reset user chat(add chat ID and current chat ID to ChatInfo model)
     #TODO : Integrate home function with ORM models
+    #TODO : Create multimple chat categories
+    #TODO : Organize code in diffrent files as soon it will be huge mess
     
     # declaring ChatConversation class for gpt
     conversation = ChatConversation("Lukasz", 20, api_key)
@@ -76,23 +84,21 @@ def home(request):
     #checkig if chat was previously generated and if not generating promt saying hello
     if not ChatInfo.objects.filter(id_user = tempUserID).exists():
         chatTimeline = conversation.get_gptResponse("Say short hello to user")
-        obj = ChatInfo(id_user = tempUserID, chat = str(chatTimeline), category = "demo")
+        obj = ChatInfo(id_user = tempUserID, chat = str(chatTimeline), category = cat)
         obj.save()
     
     
     # must use list(eval(str)) to convert single string to list of dictionaries
-    conversation.messages = list(eval(ChatInfo.objects.filter(id_user = tempUserID, category = "demo").values("chat").first()["chat"]))
+    conversation.messages = list(eval(ChatInfo.objects.filter(id_user = tempUserID, category = cat).values("chat").first()["chat"]))
     if request.method == "POST":
         prompt = request.POST["prompt"]
         chatTimeline  = conversation.get_gptResponse(prompt)
-        ChatInfo.objects.filter(id_user = tempUserID, category = "demo").update(chat = str(chatTimeline))
+        ChatInfo.objects.filter(id_user = tempUserID, category = cat).update(chat = str(chatTimeline))
     
     
-    messages_ = list(eval(ChatInfo.objects.filter(id_user = tempUserID, category = "demo").values("chat").first()["chat"]))
+    messages_ = list(eval(ChatInfo.objects.filter(id_user = tempUserID, category = cat).values("chat").first()["chat"]))
     
-    """
-        TODO: Format messages_ to HTML styled text, align user on right side of chat and assistant on left
-    """
+    #TODO: Format messages_ to HTML styled text, align user on right side of chat and assistant on left
     
     context = {'messages_': messages_,
                'reply_content': reply_content
@@ -126,3 +132,17 @@ def settings(request):
 
     return render(request, 'settings.html', {'user_profile': user_profile})
 
+def get_userbasicinfo(request):
+    """
+        Form in whitch user provides:
+            Args:
+                userID,
+                firtsName,
+                lastName,
+                emial, - login
+                password,
+                openAiKey,    
+                
+        Idk if we should seperate password ect to another table, as we will need it just once 
+    """
+    pass

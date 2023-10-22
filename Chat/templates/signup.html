@@ -3,6 +3,7 @@
 {% block content %}
 
 <div class="ui segment">
+    <h2 class="ui center aligned header">Create account</h2>
     <div class = "ui form">
         <form action="" method="post">
             {% csrf_token %}
@@ -52,19 +53,20 @@
             </div>
         </form>
     </div>
-</div>
-<div class="ui message">
-    <p class="text-base">Already have an account? <a href="/signin">Sign In</a></p>
-</div>
 
     {% if messages %}
-    <div class="message-container">
-        {% for message in messages %}
-        <p>{{ message }}</p>
-        {% endfor %}
-    </div>
+    <div class="ui warning message">
+            {% for message in messages %}
+            <p>{{ message }}</p>
+            {% endfor %}
     {% endif %}
+    </div>
+
+    <div class="ui message">
+        <p class="text-base">Already have an account? <a href="/signin">Sign In</a></p>
+    </div>
 </div>
+
 {% endblock %}
 
 
