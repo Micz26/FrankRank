@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-
+from django.utils.safestring import mark_safe
 
 from .gpt import ChatConversation
 from .models import Profile, ChatInfo
@@ -96,10 +96,10 @@ def home(request):
         ChatInfo.objects.filter(id_user = tempUserID, category = cat).update(chat = str(chatTimeline))
     
     
-    messages_ = list(eval(ChatInfo.objects.filter(id_user = tempUserID, category = cat).values("chat").first()["chat"]))
+    #messages_ = list(eval(ChatInfo.objects.filter(id_user = tempUserID, category = cat).values("chat").first()["chat"]))
     
     #TODO: Format messages_ to HTML styled text, align user on right side of chat and assistant on left
-    
+    messages_ = [mark_safe(conversation.get_messegesHTML())]
     context = {'messages_': messages_,
                'reply_content': reply_content
                }
