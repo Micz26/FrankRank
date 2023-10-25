@@ -5,11 +5,14 @@ from django.contrib.auth.decorators import login_required
 from django.utils.safestring import mark_safe
 
 from .gpt import ChatConversation
-from .models import Profile, ChatInfo
+from .models import User, ChatInfo
 import json
 
 def signup(request):
     
+    #TODO: Create HTML template and backend for User model, with openai validation
+    #TODO: Create template and backend for changing data in model
+    #TODO: Veryfi user email
     #TODO: Sigup with google, github
     
     if request.method == "POST":
