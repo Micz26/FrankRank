@@ -53,9 +53,9 @@ class ChatConversation:
         html = ""
         for msg in messegesList:
             if msg["role"] == "assistant":
-                html += "<div class=\"ui green segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
+                html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
             else:
-                html += F"<div class=\"ui segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
+                html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
             
             html += f'<div class =\"content\"><p>{msg["content"]}</div></div>'
             
