@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+</head>
+
+<body>
+    <h1>Welcome, {{ user.username }}!</h1>
+
+    <h2>Your Chats:</h2>
+    <ul>
+        {% for chat_name, chat_id in zip(chat_names, chat_ids) %}
+        <li><a href="{% url 'chat' user.username chat_id %}">{{ chat_name }}</a></li>
+        {% empty %}
+        <li>No chats available.</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+
+    <h2>Chat for User: {{ user.username }}, Chat ID: {{ chat.id_chat }}</h2>
+
+    <div>
+        <h3>Chat Messages:</h3>
+        {% for prompt, response in zip(prompts, responses) %}
+        <div>
+            <p><strong>User:</strong> {{ prompt }}</p>
+            <p><strong>Response:</strong> {{ response }}</p>
+        </div>
+        {% empty %}
+        <p>No chat messages available.</p>
+        {% endfor %}
+    </div>
+
+    <hr>
+
+    <h3>Post a Message:</h3>
+    <form method="post">
+        {% csrf_token %}
+        <label for="prompt">User Message:</label>
+        <input type="text" id="prompt" name="prompt" required>
+        <button type="submit">Send</button>
+    </form>
+</body>
+
+</html>

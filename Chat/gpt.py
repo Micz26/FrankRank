@@ -42,3 +42,21 @@ class ChatConversation:
         self.messages.append({"role": "assistant", "content": reply})
         
         return self.messages
+
+    def get_messegesHTML(self):
+        """ Formats self.meseges to HTML format
+            Returns:
+                self.messages : string with HTML
+        """
+        messegesList = self.messages[2:]
+
+        html = ""
+        for msg in messegesList:
+            if msg["role"] == "assistant":
+                html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
+            else:
+                html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
+
+            html += f'<div class =\"content\"><p>{msg["content"]}</div></div>'
+
+        return html
