@@ -39,7 +39,7 @@ def signup(request):
                 user_model = User.objects.get(username=username)
                 new_profile = Profile.objects.create(user=user_model, id_user=user_model.id, openai_api_key=openai_api_key)
                 new_profile.save()
-                return redirect('/')
+                return redirect('/settings')
         else:
             messages.info(request, 'Hasła nie są takie same')
             return redirect('signup')
@@ -131,7 +131,7 @@ def create_chat(request):
 def chat(request, pk):
     Chat = ChatInfo.objects.get(id_chat=pk)
 
-
+@login_required(login_url='signin')
 def settings(request):
     user_profile = Profile.objects.get(user=request.user)
 
