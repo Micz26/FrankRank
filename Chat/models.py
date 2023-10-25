@@ -19,14 +19,7 @@ def hash_api_key(api_key):
 
 
 # Models
-class Profile(models.Model):
-    #to bym zostawił i dodał imie, nazwisko, date urodzenia
-    id_user = models.IntegerField()
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    email = models.EmailField(unique=True)
-    openai_api_key = models.CharField(max_length=255)
-    
-    # tutaj zrobiłbym nową tabele z tymi danymi investmetriskprofile albo coś
+class InvesmentsProfile(models.Model):    
     investments = models.CharField(max_length=255, blank=True, null=True)
     sectors = models.CharField(max_length=255, blank=True, null=True)
     risk_level = models.CharField(max_length=255, blank=True, null=True)
@@ -37,13 +30,14 @@ class Profile(models.Model):
     def save(self, *args, **kwargs):
         self.email = hash_email(self.email)
         self.openai_api_key = hash_api_key(self.openai_api_key)
-        super(Profile, self).save(*args, **kwargs)
+        super(InvesmentsProfile, self).save(*args, **kwargs)
     def __str__(self):
         return self.user.username
     
     
 class ChatInfo(models.Model):
     id_user = models.IntegerField()
+    id_chat = models.IntegerField()
     chat = models.TextField()
     category = models.CharField(max_length=45, blank=True, null=True)
 
@@ -52,3 +46,17 @@ class ChatInfo(models.Model):
         
     def __str__(self):
         return self.id_user
+ 
+class User(models.Model):
+    id_user = models.IntegerField(primary_key = True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    firtsName = models.CharField(max_length=255)
+    lastName = models.CharField(max_length=255)
+    birthday = models.DateField()
+    email = models.EmailField(unique=True)
+    openai_api_key = models.CharField(max_length=255)
+    
+    def save(self, *args, **kwargs):
+        self.email = hash_email(self.email)
+        self.openai_api_key = hash_api_key(self.openai_api_key)
+        super(User, self).save(*args, **kwargs)

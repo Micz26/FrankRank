@@ -96,9 +96,7 @@ def home(request):
         ChatInfo.objects.filter(id_user = tempUserID, category = cat).update(chat = str(chatTimeline))
     
     
-    #messages_ = list(eval(ChatInfo.objects.filter(id_user = tempUserID, category = cat).values("chat").first()["chat"]))
-    
-    #TODO: Format messages_ to HTML styled text, align user on right side of chat and assistant on left
+    messages_ = list(eval(ChatInfo.objects.filter(id_user = tempUserID, category = cat).values("chat").first()["chat"]))
     messages_ = [mark_safe(conversation.get_messegesHTML())]
     context = {'messages_': messages_,
                'reply_content': reply_content
