@@ -14,19 +14,30 @@
 
 
 <div class="ui segment">
+    {% if chat_cats %}
+        <div class="chat-categories">
+            <h3>Chat Categories:</h3>
+            <ul>
+                {% for category in chat_cats %}
+                    <li>{{ category }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
     {% if messages_ %}
-    <div class="message-container">
-        {% for message in messages_ %}
-          <div class="alert alert-danger" role="alert">
-            {{ message }}
-          </div>
-        {% endfor %}
-    </div>
+        <div class="message-container">
+            {% for message in messages_ %}
+                <div class="alert alert-danger" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
 
     {% if reply_content %}
         <div class="alert alert-success" role="alert">
-          {{ reply_content }}
+            {{ reply_content }}
         </div>
     {% endif %}
     
@@ -44,8 +55,8 @@
     </div>
 </div>
 
-
 {% endblock %}
+
 
 
 

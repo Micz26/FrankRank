@@ -19,7 +19,24 @@ def hash_api_key(api_key):
 
 
 # Models
-class InvesmentsProfile(models.Model):    
+class Profile(models.Model):
+    #to bym zostawił i dodał imie, nazwisko, date urodzenia
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    id_user = models.IntegerField()
+    email = models.EmailField(unique=True)
+    openai_api_key = models.CharField(max_length=255, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.email = hash_email(self.email)
+        self.openai_api_key = hash_api_key(self.openai_api_key)
+        super(Profile, self).save(*args, **kwargs)
+    def __str__(self):
+        return self.user.username
+
+
+class UserInfo(models.Model):
+    id_user = models.ForeignKey(Profile, on_delete=models.CASCADE)
+
     investments = models.CharField(max_length=255, blank=True, null=True)
     sectors = models.CharField(max_length=255, blank=True, null=True)
     risk_level = models.CharField(max_length=255, blank=True, null=True)
@@ -27,17 +44,12 @@ class InvesmentsProfile(models.Model):
     investment_period = models.CharField(max_length=255, blank=True, null=True)
     esg = models.CharField(max_length=255, blank=True, null=True)
 
-    def save(self, *args, **kwargs):
-        self.email = hash_email(self.email)
-        self.openai_api_key = hash_api_key(self.openai_api_key)
-        super(InvesmentsProfile, self).save(*args, **kwargs)
     def __str__(self):
-        return self.user.username
-    
+        return {self.user.id_user}
     
 class ChatInfo(models.Model):
-    id_user = models.IntegerField()
-    #id_chat = models.IntegerField()
+    id_chat = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.CharField(max_length=100)
     chat = models.TextField()
     category = models.CharField(max_length=45, blank=True, null=True)
 
@@ -46,17 +58,27 @@ class ChatInfo(models.Model):
         
     def __str__(self):
         return self.id_user
- 
-class User(models.Model):
-    id_user = models.IntegerField(primary_key = True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    firtsName = models.CharField(max_length=255)
-    lastName = models.CharField(max_length=255)
-    birthday = models.DateField()
-    email = models.EmailField(unique=True)
-    openai_api_key = models.CharField(max_length=255)
-    
-    def save(self, *args, **kwargs):
-        self.email = hash_email(self.email)
-        self.openai_api_key = hash_api_key(self.openai_api_key)
-        super(User, self).save(*args, **kwargs)
+
+
+
+
+
+# modele archiwalne :)
+
+
+"""
+class Chat(models.Model):
+    id_chat = models.IntegerField(unique=True)
+    id_user = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    name = models.CharField(max_length=45, default='Chat')
+    date_chat = models.DateTimeField(auto_now_add=True)
+
+
+
+class ChatMessage(models.Model):
+    id_message = models.IntegerField(unique=True)
+    id_chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
+    prompt = models.TextField()
+    response = models.TextField()
+    date_message = models.DateTimeField(auto_now_add=True)"""
+
