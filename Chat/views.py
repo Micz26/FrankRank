@@ -82,7 +82,7 @@ def home(request):
     
     # declaring ChatConversation class for gpt
     conversation = ChatConversation("Lukasz", 20, api_key)
-    tempUserID = 2138
+    tempUserID = 213700
 
     #checkig if chat was previously generated and if not generating promt saying hello
     if not ChatInfo.objects.filter(id_user = tempUserID).exists():
@@ -95,7 +95,7 @@ def home(request):
     conversation.messages = list(eval(ChatInfo.objects.filter(id_user = tempUserID, category = cat).values("chat").first()["chat"]))
     if request.method == "POST":
         prompt = request.POST["prompt"]
-        chatTimeline  = conversation.get_gptResponse(prompt)
+        chatTimeline  = conversation.get_gptFunction(prompt)
         ChatInfo.objects.filter(id_user = tempUserID, category = cat).update(chat = str(chatTimeline))
     
     

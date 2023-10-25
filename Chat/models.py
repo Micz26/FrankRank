@@ -37,7 +37,7 @@ class InvesmentsProfile(models.Model):
     
 class ChatInfo(models.Model):
     id_user = models.IntegerField()
-    id_chat = models.IntegerField()
+    #id_chat = models.IntegerField()
     chat = models.TextField()
     category = models.CharField(max_length=45, blank=True, null=True)
 
