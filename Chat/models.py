@@ -20,7 +20,6 @@ def hash_api_key(api_key):
 
 # Models
 class Profile(models.Model):
-    #to bym zostawił i dodał imie, nazwisko, date urodzenia
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     id_user = models.IntegerField()
     email = models.EmailField(unique=True)
@@ -58,27 +57,3 @@ class ChatInfo(models.Model):
         
     def __str__(self):
         return self.id_user
-
-
-
-
-
-# modele archiwalne :)
-
-
-"""
-class Chat(models.Model):
-    id_chat = models.IntegerField(unique=True)
-    id_user = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    name = models.CharField(max_length=45, default='Chat')
-    date_chat = models.DateTimeField(auto_now_add=True)
-
-
-
-class ChatMessage(models.Model):
-    id_message = models.IntegerField(unique=True)
-    id_chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
-    prompt = models.TextField()
-    response = models.TextField()
-    date_message = models.DateTimeField(auto_now_add=True)"""
-

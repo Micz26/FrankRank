@@ -8,22 +8,24 @@
         <a href="/logout" class="item">Log out</a>
     </div>
 </div>
-<div class="ui divider"></div>
-<h1>   </h1>
 <div class="ui hidden divider"></div>
+<div class="ui hidden divider"></div>
+<div class="ui hidden divider"></div>
+<div class="ui hidden divider"></div>
+
+<div class="ui container">
+    {% if chat_cats %}
+    <div class="ui secondary pointing menu">
+        <div class="header item"><span>Category</span></div>
+        {% for category in chat_cats %}
+            <div class="item">{{ category }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
 
 
 <div class="ui segment">
-    {% if chat_cats %}
-        <div class="chat-categories">
-            <h3>Chat Categories:</h3>
-            <ul>
-                {% for category in chat_cats %}
-                    <li>{{ category }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
 
     {% if messages_ %}
         <div class="message-container">
