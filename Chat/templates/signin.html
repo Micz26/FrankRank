@@ -1,54 +1,59 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<div class="ui fixed inverted menu">
+
+<div class="ui fixed inverted menu" >
     <div class="ui container">
-        <a href="#" class="header item"><h1>FinFrank</h1></a>
+        <a href="#" class="header item"><h2>FinFrank</h2></a>
         <a href="#" class="item">Contact</a>
 
     </div>
 </div>
-<div class="ui divider"></div>
-<h1>   </h1>
-<div class="ui hidden divider"></div>
 
-<div class="ui segment">
-    <div class="ui large form">
-        <h2 class="ui center aligned header">Log-in to your account</h2>
-            <form method="post" class="form-container">
-                {% csrf_token %}
-                <div class = "field">
-                    <div class="form-group">
-                        <input type="text" id="username" name="username" required class="input-field", placeholder="Username">
-                    </div>
-                </div>
-                <div class = "field">
-                    <div class="form-group">
-                        <input type="password" id="password" name="password" required class="input-field" placeholder="Password">
-                    </div>
-                </div>
-                <div class = "field">
-                    <div class="form-group">
-                        <input type="submit" value="Sign In" class="ui fluid large submit button">
-                    </div> 
-                </div>
-        </div>
-        {% if messages %}
-        <div class="ui warning message">
-            {% for message in messages %}
-            <p>{{ message }}</p>
-            {% endfor %}
-        </div>
-        {% endif %}
-    </div>
 
-    <div class="ui message">
-        <p class="text-base">You do not have an account yet? <a href="/signup">Sign up</a></p>
+<div class="five wide column"></div>
+<div class="five wide column">
+    <div class = "ui menu"></div>
+    <div class = "ui hidden divider"></div>
+    <div class="ui segment">
+        <div class="ui segment">
+            <div class="ui large form">
+                <h2 class="ui center aligned header">Log-in to your account</h2>
+                    <form method="post" class="form-container">
+                        {% csrf_token %}
+                        <div class = "field">
+                            <div class="form-group">
+                                <input type="text" id="username" name="username" required class="input-field", placeholder="Username">
+                            </div>
+                        </div>
+                        <div class = "field">
+                            <div class="form-group">
+                                <input type="password" id="password" name="password" required class="input-field" placeholder="Password">
+                            </div>
+                        </div>
+                        <div class = "field">
+                            <div class="form-group">
+                                <input type="submit" value="Sign In" class="ui fluid large submit button">
+                            </div> 
+                        </div>
+                </div>
+                {% if messages %}
+                <div class="ui warning message">
+                    {% for message in messages %}
+                    <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        
+            <div class="ui message">
+                <p class="text-base">You do not have an account yet? <a href="/signup">Sign up</a></p>
+            </div>
+        </div>
+        
+        
+        </form>
     </div>
 </div>
-
-
-</form>
 
 {% endblock %}
 

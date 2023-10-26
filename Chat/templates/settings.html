@@ -3,57 +3,87 @@
 {% block content %}
 <div class="ui fixed inverted menu">
     <div class="ui container">
-        <a href="#" class="header item"><h1>FinFrank</h1></a>
-        <a href="#" class="item">Home</a>
-        <a href="#" class="item">Contact</a>
-        <a href="/logout" class="item">Log out</a>
+        <a href="/" class="header item"><h1>FinFrank</h1></a>
+        <a href="/" class="item">Home</a>
+
     </div>
 </div>
-<div class="ui divider"></div>
-<h1>   </h1>
-<div class="ui hidden divider"></div>
+
+<div class="four wide column"></div>
+
+<div class="eight wide column">
+    <div class = "ui menu"></div>
+    <div class = "ui hidden divider"></div>
+    <div class="ui segment">
+        <div class="ui segment">            
+            <h2 class="ui center aligned header">Update account</h2>
+                <div class="ui form">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="field">
+                            <div class="form-group">
+                                <div class="ui fluid labeled input">
+                                    <a class="ui label" style="width:13%; text-align:center;" for="investments">Investments (Obligacje, Indeksy ETF):</a>
+                                    <input type="text" name="investments" id="investments" value="{{ user_info.investments }}" class="input-field">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="form-group">
+                                <div class="ui fluid labeled input">
+                                    <a class="ui label" style="width:13%; text-align:center;" for="sectors">Sektory Inwestycji:</a>
+                                    <input type="text" name="sectors" id="sectors" value="{{ user_info.sectors }}" class="input-field">
+                                </div>
+                            </div>
+                        </div>
 
 
-</style>
-<p class="section-title">Update your profile:</p>
-<div class="form-container">
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+                        <div class="field">
+                            <div class="form-group">
+                                <div class="ui fluid labeled input">
+                                    <a class="ui label" style="width:13%; text-align:center;" for="risk_level">Poziom Ryzyka:</a>
+                                    <input type="text" name="risk_level" id="risk_level" value="{{ user_info.risk_level }}" class="input-field">
+                                </div>
+                            </div>
+                        </div>
 
-        <div class="form-group">
-            <label for="investments">Investments (Obligacje, Indeksy ETF):</label>
-            <input type="text" name="investments" id="investments" value="{{ user_info.investments }}" class="input-field">
+                        <div class="field">
+                            <div class="form-group">
+                                <div class="ui fluid labeled input">
+                                    <a class="ui label" style="width:13%; text-align:center;" for="expected_annual_return">Oczekiwany Roczny Zwrot:</a>
+                                    <input type="number" name="expected_annual_return" id="expected_annual_return" value="{{ user_info.expected_annual_return }}" class="input-field">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="form-group">
+                                <div class="ui fluid labeled input">
+                                    <a class="ui label" style="width:13%; text-align:center;" for="investment_period">Okres Czasowy:</a>
+                                    <input type="text" name="investment_period" id="investment_period" value="{{ user_info.investment_period }}" class="input-field">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="form-group">
+                                <div class="ui fluid labeled input">
+                                    <a class="ui label" style="width:13%; text-align:center;" for="esg">ESG:</a>
+                                    <input type="text" name="esg" id="esg" value="{{ user_info.esg }}" class="input-field">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="ui fluid button">Save Changes</button>
+                        </div>
+                    </form>
+
+                    <a href="/" class="back-link">Home</a>
+                </div>
+            </div>
         </div>
-
-        <div class="form-group">
-            <label for="sectors">Sektory Inwestycji:</label>
-            <input type="text" name="sectors" id="sectors" value="{{ user_info.sectors }}" class="input-field">
-        </div>
-
-        <div class="form-group">
-            <label for="risk_level">Poziom Ryzyka:</label>
-            <input type="text" name="risk_level" id="risk_level" value="{{ user_info.risk_level }}" class="input-field">
-        </div>
-
-        <div class="form-group">
-            <label for="expected_annual_return">Oczekiwany Roczny Zwrot:</label>
-            <input type="text" name="expected_annual_return" id="expected_annual_return" value="{{ user_info.expected_annual_return }}" class="input-field">
-        </div>
-
-        <div class="form-group">
-            <label for="investment_period">Okres Czasowy:</label>
-            <input type="text" name="investment_period" id="investment_period" value="{{ user_info.investment_period }}" class="input-field">
-        </div>
-
-        <div class="form-group">
-            <label for="esg">ESG:</label>
-            <input type="text" name="esg" id="esg" value="{{ user_info.esg }}" class="input-field">
-        </div>
-        <div class="form-group">
-            <button type="submit" class="submit-button">Save Changes</button>
-        </div>
-    </form>
-
-    <a href="/" class="back-link">Home</a>
+    </div>
 </div>
+
 {% endblock %}

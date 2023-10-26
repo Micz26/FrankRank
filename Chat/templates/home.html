@@ -1,60 +1,83 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="ui segment">
-    <div class="ui fixed inverted menu">
-        <div class="ui container">
-            <a href="#" class="header item"><h1>FinFrank</h1></a>
-            <a href="#" class="item">Contact</a>
-            <a href="/settings" class="right item">Settings</a>
-            <a href="/logout" class="item">Log out</a>
-        </div>
-    </div>
-    <div class="ui hidden divider"></div>
-    <div class="ui hidden divider"></div>
-    <div class="ui hidden divider"></div>
-    <div class="ui hidden divider"></div>
 
-    <div class="ui secondary pointing menu">
-        <div class="header item"><span>Category</span></div>
-        <div class="item">{{ chat_category }}</div>
-
-            <form method="POST">
-                {% csrf_token %}
-                <div class="ui fluid action input">
-                    <select name="new_category" class="ui dropdown">
-                        {% for category in chat_categories %}
-                            <option value="{{ category }}">{{ category }}</option>
-                        {% endfor %}
-                    </select>
-                    <button type="submit" class="ui button">Change Category</button>
-                </div>
-    </div>
-
-    <div class="message-container">
-        {% for message in messages_ %}
-            <div class="alert alert-danger" role="alert">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-
-    {% if reply_content %}
-        <div class="alert alert-success" role="alert">
-            {{ reply_content }}
-        </div>
-    {% endif %}
-
-    <div class="ui form">
-        <div class="prompt-field">
-                <div class="ui fluid action input">
-                    <input type="text" name="prompt" placeholder="prompt" class="ui input">
-                    <button type="submit" class="ui button">Click to send prompt<i></i></button>
-                </div>
-            </form>
-        </div>
+<div class="ui fixed inverted menu">
+    <div class="ui container">
+        <a href="#" class="header item"><h1>FinFrank</h1></a>
+        <a href="#" class="item">Contact</a>
+        <a href="/settings" class="right item">Settings</a>
+        <a href="/logout" class="item">Log out</a>
     </div>
 </div>
+
+<div class = "ui menu"></div>
+
+<div class="three column row">
+
+    <div class="four wide column">
+        <div class="ui tertiary segment">
+            <div class = "ui segment">
+                <h3 class="ui header">Category - <div class="item">{{ chat_category }}</div></h3>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="ui action input">
+                            <select name="new_category" class="ui dropdown">
+                                {% for category in chat_categories %}
+                                    <option class = "item" value="{{ category }}">{{ category }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="ui divider"></div>
+                            <button type="submit" class="ui button">Change Category</button>
+                        </div>
+                        </form>
+                        <form method="POST">
+                        {% csrf_token %}
+                        <div class="ui action input">
+                            <button type="submit" name="new_chat" class="ui button"  href="/chat/{{new_obj_id}}">New Chat</button>
+                            <div class="ui divider"></div>
+
+                    </div>
+            </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="eleven wide column">
+        <div class = "ui segment">
+            <div class="message-container">
+                {% for message in messages_ %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if reply_content %}
+                <div class="alert alert-success" role="alert">
+                    {{ reply_content }}
+                </div>
+            {% endif %}
+            <form method="POST">
+                {% csrf_token %}
+            <div class="ui form">
+                <div class="prompt-field">
+                        <div class="ui fluid action input">
+                            <input type="text" name="prompt" placeholder="prompt" class="ui input">
+                            <button type="submit" class="ui button">Click to send prompt<i></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="one wide column"></div>
+
+</div>
+
 
 <script>
     $(document).ready(function(){
@@ -62,7 +85,6 @@
     });
 </script>
 {% endblock %}
-
 
 
 

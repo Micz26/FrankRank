@@ -7,5 +7,6 @@ urlpatterns = [
     path("signin", views.signin, name="signin"),
     path("signup", views.signup, name="signup"),
     path("logout", views.logout, name="logout"),
-    path("settings", views.settings, name="settings")
+    path("settings", views.settings, name="settings"),
+    path("chat/<uuid:pk>", views.chat, name="chat")
 ]
