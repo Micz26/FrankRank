@@ -112,8 +112,9 @@ def home(request):
     conversation.messages = list(eval(obj.chat))
     if request.method == "POST":
         prompt = request.POST["prompt"]
-        chatTimeline  = conversation.get_gptFunction(prompt)
-        obj.chat = str(chatTimeline)
+        if prompt is not None and prompt != '':
+            chatTimeline  = conversation.get_gptFunction(prompt)
+            obj.chat = str(chatTimeline)
         new_category = request.POST["new_category"]
         if new_category is not None:
             obj.category = new_category
