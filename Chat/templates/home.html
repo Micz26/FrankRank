@@ -19,7 +19,6 @@
         <div class="ui tertiary segment">
             <div class = "ui segment">
                 <h3 class="ui header">Category - <div class="item">{{ chat_category }}</div></h3>
-
                     <form method="POST">
                         {% csrf_token %}
                         <div class="ui action input">
@@ -35,14 +34,18 @@
         </div>
     </div>
 
-    <div class="eleven wide column">
-        <div class = "ui segment">
-            <div class="message-container">
+    <div class="eleven wide column" >
+        <div class = "ui segment" >
+            <div id = "scroll" style="overflow-y: scroll; height: 45vw;">
                 {% for message in messages_ %}
                     <div class="alert alert-danger" role="alert">
                         {{ message }}
                     </div>
                 {% endfor %}
+                <script>
+                    var objDiv = document.getElementById("scroll");
+                    objDiv.scrollTop = objDiv.scrollHeight;
+                </script>
             </div>
         
             {% if reply_content %}

@@ -83,7 +83,6 @@ def home(request):
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
 
 
-    
     #TODO : Reset user chat(add chat ID and current chat ID to ChatInfo model)
     #TODO : Integrate home function with ORM models
     #TODO : Create multimple chat categories
