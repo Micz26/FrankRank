@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils.safestring import mark_safe
 from django.contrib.auth.decorators import login_required
 from django.utils.safestring import mark_safe
@@ -80,6 +80,7 @@ def home(request):
     reply_content = ''
     api_key = open("C:\\Users\\mikol\\OneDrive\\Dokumenty\\key.txt", "r").read().strip("\n")
     user = request.user.username
+    chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
 
 
     
@@ -113,17 +114,31 @@ def home(request):
         prompt = request.POST["prompt"]
         chatTimeline  = conversation.get_gptFunction(prompt)
         obj.chat = str(chatTimeline)
+        new_category = request.POST["new_category"]
+        if new_category is not None:
+            obj.category = new_category
         obj.save()
-    
+
     messages_ = list(eval(obj.chat))
     messages_ = [mark_safe(conversation.get_messegesHTML())]
     context = {'messages_': messages_,
                'reply_content': reply_content,
                'chat_cats': chat_ids,
-               'chat_category': chat_category
+               'chat_category': chat_category,
+               'chat_categories': chat_categories
                }
 
     return render(request, 'home.html', context=context)
+
+"""def update_category(request):
+    user = request.user.username
+    if request.method == "POST" and request.is_ajax():
+        new_category = request.POST.get("new_category")
+        obj = ChatInfo.objects.filter(user=user).order_by('-created_at').first()
+        obj.category = new_category
+        obj.save()
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False})"""
 
 @login_required(login_url='signin')
 def create_chat(request):
