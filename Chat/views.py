@@ -42,7 +42,7 @@ def signup(request):
                 user_model = User.objects.get(username=username)
                 new_profile = Profile.objects.create(user=user_model, id_user=user_model.id, openai_api_key=openai_api_key)
                 new_profile.save()
-                return redirect('/')
+                return redirect('/settings')
         else:
             messages.info(request, 'Hasła nie są takie same')
             return redirect('signup')
@@ -134,7 +134,7 @@ def create_chat(request):
 def chat(request, pk):
     Chat = ChatInfo.objects.get(id_chat=pk)
 
-
+@login_required(login_url='signin')
 def settings(request):
     user_profile = Profile.objects.get(user=request.user)
 
@@ -178,52 +178,3 @@ def get_userbasicinfo(request):
     pass
 
 
-
-# to są te viewsy ktore robiłem ale są do wyjebanie, ale narazie nie usuwajcie
-
-"""
-def home2(request, id_user):
-    user = User.objects.get(username=id_user)
-    chats = Chat.objects.filter(id_user=id_user)
-    context = {
-        'user': user,
-        'chats': chats
-    }
-    return render(request, 'home2.html', context=context)
-
-def chat(request, id_user, id_chat):
-    user = User.objects.get(username=id_user)
-    chat_names = Chat.objects.filter(id_user=id_user).values_list('name', flat=True)
-    chat_ids = Chat.objects.filter(id_user=id_user).values_list('id_chat', flat=True)
-    api_key = open("C:\\Users\\mikol\\OneDrive\\Dokumenty\\key.txt", "r").read().strip("\n")
-    chat = ''
-
-    if request.method == "POST":
-        if not Chat.objects.filter(id_chat=id_chat, id_user=id_user).exists():
-            chat = Chat.objects.create(id_user=id_user)
-            chat.save()
-        else:
-            chat = Chat.objects.get(id_user=id_user, id_chat=id_chat)
-        prompt = request.POST["prompt"]
-        conversation = ChatConversation("Lukasz", 20, api_key)
-        response = conversation.get_gptResponse(prompt)
-        chat_message = ChatMessage.objects.create(id_chat=id_chat, prompt=prompt, response=response)
-        chat_message.save()
-
-    chat_messages = ChatMessage.objects.filter(id_chat=id_chat)
-    prompts = []
-    responses = []
-    for message in chat_messages:
-        prompts.append(message.prompt)
-        responses.append(message.response)
-
-    context = {
-        'user': user,
-        'chat_names': chat_names,
-        'chat_ids': chat_ids,
-        'prompts': prompts,
-        'responses': responses,
-        'chat': chat
-    }
-    return render(request, 'chat.html', context=context)
-"""
