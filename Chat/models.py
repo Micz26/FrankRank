@@ -50,7 +50,8 @@ class ChatInfo(models.Model):
     id_chat = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.CharField(max_length=100)
     chat = models.TextField()
-    category = models.CharField(max_length=45, blank=True, null=True)
+    category = models.CharField(max_length=45, default="New Chat")
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         super(ChatInfo, self).save(*args, **kwargs)

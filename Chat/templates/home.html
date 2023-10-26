@@ -14,12 +14,10 @@
 <div class="ui hidden divider"></div>
 
 <div class="ui container">
-    {% if chat_cats %}
+    {% if chat_category %}
     <div class="ui secondary pointing menu">
         <div class="header item"><span>Category</span></div>
-        {% for category in chat_cats %}
-            <div class="item">{{ category }}</div>
-        {% endfor %}
+            <div class="item">{{ chat_category }}</div>
     </div>
     {% endif %}
 </div>

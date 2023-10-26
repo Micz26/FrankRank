@@ -34,6 +34,7 @@ def signup(request):
                 return redirect('signup')
             
             else:
+
                 user = User.objects.create_user(username=username, email=email, password=password)
                 user.save()
 
@@ -77,8 +78,7 @@ def logout(request):
 def home(request):
     messages_ = []
     reply_content = ''
-    api_key = "XXX"
-    cat = "demo"
+    api_key = open("C:\\Users\\mikol\\OneDrive\\Dokumenty\\key.txt", "r").read().strip("\n")
     user = request.user.username
 
 
@@ -91,30 +91,36 @@ def home(request):
     # declaring ChatConversation class for gpt
     conversation = ChatConversation(user, 20, api_key)
     chats = ChatInfo.objects.filter(user=user)
-
+    chat_category = ''
     chat_ids = []
+
     #checkig if chat was previously generated and if not generating promt saying hello
     if not ChatInfo.objects.filter(user=user).exists():
         chatTimeline = conversation.get_gptResponse("Say short hello to user")
-        obj = ChatInfo(user=user, chat=str(chatTimeline), category=cat)
+        obj = ChatInfo(user=user, chat=str(chatTimeline))
         obj.save()
+        chat_category = obj.category
     else:
+        obj = ChatInfo.objects.filter(user=user).order_by('-created_at').first()
+        chat_category = obj.category
         for chat in chats:
             chat_ids.append(chat.id_chat)
     
     
     # must use list(eval(str)) to convert single string to list of dictionaries
-    conversation.messages = list(eval(ChatInfo.objects.filter(user=user, category = cat).values("chat").first()["chat"]))
+    conversation.messages = list(eval(obj.chat))
     if request.method == "POST":
         prompt = request.POST["prompt"]
         chatTimeline  = conversation.get_gptFunction(prompt)
-        ChatInfo.objects.filter(user = user, category = cat).update(chat = str(chatTimeline))
+        obj.chat = str(chatTimeline)
+        obj.save()
     
-    messages_ = list(eval(ChatInfo.objects.filter(user=user, category = cat).values("chat").first()["chat"]))
+    messages_ = list(eval(obj.chat))
     messages_ = [mark_safe(conversation.get_messegesHTML())]
     context = {'messages_': messages_,
                'reply_content': reply_content,
-               'chat_cats': chat_ids
+               'chat_cats': chat_ids,
+               'chat_category': chat_category
                }
 
     return render(request, 'home.html', context=context)
