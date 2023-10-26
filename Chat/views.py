@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.safestring import mark_safe
 
 from .gpt import ChatConversation
-from .models import User, ChatInfo, UserInfo
+from .models import Profile, ChatInfo, UserInfo
 import json
 
 def signup(request):
@@ -39,7 +39,7 @@ def signup(request):
 
                 user_login = auth.authenticate(username=username, password=password)
                 auth.login(request, user_login)
-                user_model = User.objects.get(username=username)
+                user_model = Profile.objects.get(username=username)
                 new_profile = Profile.objects.create(user=user_model, id_user=user_model.id, openai_api_key=openai_api_key)
                 new_profile.save()
                 return redirect('/settings')
@@ -77,7 +77,7 @@ def logout(request):
 def home(request):
     messages_ = []
     reply_content = ''
-    api_key = open("C:\\Users\\mikol\\OneDrive\\Dokumenty\\key.txt", "r").read().strip("\n")
+    api_key = "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"
     cat = "demo"
     user = request.user.username
 
@@ -90,7 +90,6 @@ def home(request):
     
     # declaring ChatConversation class for gpt
     conversation = ChatConversation(user, 20, api_key)
-
     chats = ChatInfo.objects.filter(user=user)
 
     chat_ids = []
@@ -109,13 +108,9 @@ def home(request):
     if request.method == "POST":
         prompt = request.POST["prompt"]
         chatTimeline  = conversation.get_gptFunction(prompt)
-        ChatInfo.objects.filter(id_user = tempUserID, category = cat).update(chat = str(chatTimeline))
+        ChatInfo.objects.filter(user = user, category = cat).update(chat = str(chatTimeline))
     
-    
-
     messages_ = list(eval(ChatInfo.objects.filter(user=user, category = cat).values("chat").first()["chat"]))
-
-    messages_ = list(eval(ChatInfo.objects.filter(user=user, category=cat).values("chat").first()["chat"]))
     messages_ = [mark_safe(conversation.get_messegesHTML())]
     context = {'messages_': messages_,
                'reply_content': reply_content,
@@ -136,7 +131,7 @@ def chat(request, pk):
 
 @login_required(login_url='signin')
 def settings(request):
-    user_profile = Profile.objects.get(user=request.user)
+    user_profile = UserInfo.objects.get(user=request.user)
 
     if request.method == "POST":
 
@@ -161,20 +156,5 @@ def settings(request):
     return render(request, 'settings.html', {'user_profile': user_profile})
 
 
-
-def get_userbasicinfo(request):
-    """
-        Form in whitch user provides:
-            Args:
-                userID,
-                firtsName,
-                lastName,
-                emial, - login
-                password,
-                openAiKey,    
-                
-        Idk if we should seperate password ect to another table, as we will need it just once 
-    """
-    pass
 
 
