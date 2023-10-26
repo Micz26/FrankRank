@@ -78,7 +78,7 @@ def logout(request):
 def home(request):
     messages_ = []
     reply_content = ''
-    api_key = api_key
+    api_key = "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"
     user = request.user.username
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
 

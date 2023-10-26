@@ -16,7 +16,7 @@
 <div class="three column row">
 
     <div class="four wide column">
-        <div class="ui tertiary segment">
+        <div class="ui tertiary segment" style="overflow-y: scroll; height: 50vw; margin-left: 1vw;">
             <div class = "ui segment">
                 <h3 class="ui header">Category - <div class="item">{{ chat_category }}</div></h3>
                     <form method="POST">
@@ -36,7 +36,7 @@
 
     <div class="eleven wide column" >
         <div class = "ui segment" >
-            <div id = "scroll" style="overflow-y: scroll; height: 45vw;">
+            <div id = "scroll" style="overflow-y: scroll; height: 46vw;">
                 {% for message in messages_ %}
                     <div class="alert alert-danger" role="alert">
                         {{ message }}
