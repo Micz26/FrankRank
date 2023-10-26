@@ -22,32 +22,32 @@
 
         <div class="form-group">
             <label for="investments">Investments (Obligacje, Indeksy ETF):</label>
-            <input type="text" name="investments" id="investments" value="{{ user_profile.investments }}" class="input-field">
+            <input type="text" name="investments" id="investments" value="{{ user_info.investments }}" class="input-field">
         </div>
 
         <div class="form-group">
             <label for="sectors">Sektory Inwestycji:</label>
-            <input type="text" name="sectors" id="sectors" value="{{ user_profile.sectors }}" class="input-field">
+            <input type="text" name="sectors" id="sectors" value="{{ user_info.sectors }}" class="input-field">
         </div>
 
         <div class="form-group">
             <label for="risk_level">Poziom Ryzyka:</label>
-            <input type="text" name="risk_level" id="risk_level" value="{{ user_profile.risk_level }}" class="input-field">
+            <input type="text" name="risk_level" id="risk_level" value="{{ user_info.risk_level }}" class="input-field">
         </div>
 
         <div class="form-group">
             <label for="expected_annual_return">Oczekiwany Roczny Zwrot:</label>
-            <input type="text" name="expected_annual_return" id="expected_annual_return" value="{{ user_profile.expected_annual_return }}" class="input-field">
+            <input type="text" name="expected_annual_return" id="expected_annual_return" value="{{ user_info.expected_annual_return }}" class="input-field">
         </div>
 
         <div class="form-group">
             <label for="investment_period">Okres Czasowy:</label>
-            <input type="text" name="investment_period" id="investment_period" value="{{ user_profile.investment_period }}" class="input-field">
+            <input type="text" name="investment_period" id="investment_period" value="{{ user_info.investment_period }}" class="input-field">
         </div>
 
         <div class="form-group">
             <label for="esg">ESG:</label>
-            <input type="text" name="esg" id="esg" value="{{ user_profile.esg }}" class="input-field">
+            <input type="text" name="esg" id="esg" value="{{ user_info.esg }}" class="input-field">
         </div>
         <div class="form-group">
             <button type="submit" class="submit-button">Save Changes</button>

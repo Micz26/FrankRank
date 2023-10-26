@@ -40,7 +40,7 @@ def signup(request):
 
                 user_login = auth.authenticate(username=username, password=password)
                 auth.login(request, user_login)
-                user_model = Profile.objects.get(username=username)
+                user_model = User.objects.get(username=username)
                 new_profile = Profile.objects.create(user=user_model, id_user=user_model.id, openai_api_key=openai_api_key)
                 new_profile.save()
                 return redirect('/settings')
@@ -152,7 +152,8 @@ def chat(request, pk):
 
 @login_required(login_url='signin')
 def settings(request):
-    user_profile = UserInfo.objects.get(user=request.user)
+    user_profile = Profile.objects.get(user=request.user)
+    user_info = UserInfo.objects.create(id_user=user_profile)
 
     if request.method == "POST":
 
@@ -163,18 +164,18 @@ def settings(request):
         investment_period = request.POST.get('investment_period', '')
         esg = request.POST.get('esg', '')
 
-        user_profile.investments = investments
-        user_profile.sectors = sectors
-        user_profile.risk_level = risk_level
-        user_profile.expected_annual_return = expected_annual_return
-        user_profile.investment_period = investment_period
-        user_profile.esg = esg
+        user_info.investments = investments
+        user_info.sectors = sectors
+        user_info.risk_level = risk_level
+        user_info.expected_annual_return = expected_annual_return
+        user_info.investment_period = investment_period
+        user_info.esg = esg
 
-        user_profile.save()
+        user_info.save()
 
         return redirect('settings')
 
-    return render(request, 'settings.html', {'user_profile': user_profile})
+    return render(request, 'settings.html', {'user_info': user_info})
 
 
 
