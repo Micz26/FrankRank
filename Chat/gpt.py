@@ -2,6 +2,7 @@ import openai
 import yfinance as yf
 import json
 import plotly.express as px
+import pandas as pd
 import plotly.graph_objects as go
 from plotly.offline import plot
 
@@ -24,7 +25,7 @@ class ChatConversation:
                     f"You are a conservative, minimalistic financial advisor, who doesnt say anything unless he is very sure,"
                     f" to user named {self.userName} of age {self.age}. You want to help him maximize investment returns."}]
         self.htmlChart = ""
-        openai.api_key = "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"
+        openai.api_key = api_key
         self.functions = [
             {
                 "name": "get_stock_value",
@@ -64,6 +65,21 @@ class ChatConversation:
             {
                 "name": "show_news",
                 "description": "show a brief news about given stock",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "chosen_stock": {
+                            "type": "string",
+                            "description": "Stock name e.g. META or ACN",
+                        },
+                    },
+                    "required": ["chosen_stock"],
+                },
+            },
+
+            {
+                "name": "display_major_holders",
+                "description": "display major holders of given stock",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -125,8 +141,7 @@ class ChatConversation:
                 i += 1
             
         return html
-    
-    
+
     
     def get_stock_value(self, stock_name, time = None):
         stock_data = yf.Ticker(stock_name).history(period="1d")["Close"][0]
@@ -145,13 +160,26 @@ class ChatConversation:
 
         return json.dumps(news_info), None
 
+    def display_major_holders(self, stock_name, time):
+        holders_data = yf.Ticker(stock_name).major_holders
+        print(holders_data)
+        df = pd.DataFrame(holders_data)
+
+        df.columns = ['Percentage', 'Description']
+        json_data = df.to_json(orient='records', lines=True)
+        with open('holders_data.json', 'w') as f:
+            f.write(json_data)
+
+        return json.dumps(json_data), None
+
 
     def interpret_a_chart(self, stock_name, time):
         stock_data = yf.Ticker(stock_name).history(period=time)
         fig = px.scatter(x=stock_data.index, y=stock_data["Close"], width=800, height=400)
         div = fig.to_html(full_html=False)
     
-        stock_data = f"Interpret this list of days close prices {stock_data['Close'].to_list()}. Dont show them to user and talk about trend."
+        stock_data = f"Interpret this list of days close prices {stock_data['Close'].to_list()}. " \
+                     f"Dont show them to user and talk about trend."
 
         return json.dumps(stock_data), div
     
@@ -179,7 +207,8 @@ class ChatConversation:
             available_functions = {
                 "get_stock_value": self.get_stock_value,
                 "interpret_a_chart": self.interpret_a_chart,
-                "show_news": self.show_news
+                "show_news": self.show_news,
+                "display_major_holders": self.display_major_holders
             }
 
 
