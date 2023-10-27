@@ -21,9 +21,10 @@ class ChatConversation:
         self.userName = name
         self.age = age
         self.messages = [{"role": "assistant", "content": 
-                    f"You are a conservative financial advisor to user named {self.userName} of age {self.age}. You want to help him maximize investment returns."}]
+                    f"You are a conservative, minimalistic financial advisor, who doesnt say anything unless he is very sure,"
+                    f" to user named {self.userName} of age {self.age}. You want to help him maximize investment returns."}]
         self.htmlChart = ""
-        openai.api_key  = api_key
+        openai.api_key = "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"
         self.functions = [
             {
                 "name": "get_stock_value",
@@ -58,7 +59,23 @@ class ChatConversation:
                     },
                     "required": ["chosen_stock", "time"],
                 },
-            }
+            },
+
+            {
+                "name": "show_news",
+                "description": "show a brief news about given stock",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "chosen_stock": {
+                            "type": "string",
+                            "description": "Stock name e.g. META or ACN",
+                        },
+                    },
+                    "required": ["chosen_stock"],
+                },
+            },
+
         ]
     
     
@@ -116,6 +133,18 @@ class ChatConversation:
 
         return json.dumps(stock_data), None
 
+    def show_news(self, stock_name, time=None):
+        news_data = yf.Ticker(stock_name).news
+        filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
+
+        news_info = []
+        for news in filtered_news[-3:]:
+            title = news['title']
+            link = news['link']
+            news_info.append((title, link))
+
+        return json.dumps(news_info), None
+
 
     def interpret_a_chart(self, stock_name, time):
         stock_data = yf.Ticker(stock_name).history(period=time)
@@ -141,18 +170,22 @@ class ChatConversation:
         
         #temp, case we dont want to save function calls
         temp = self.messages.copy()
-        response_message = response["choices"][0]["message"]
+        try:
+            response_message = response["choices"][0]["message"]
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
         if response_message.get("function_call"):
             available_functions = {
                 "get_stock_value": self.get_stock_value,
-                "interpret_a_chart": self.interpret_a_chart
+                "interpret_a_chart": self.interpret_a_chart,
+                "show_news": self.show_news
             }
-            
+
+
             function_name = response_message["function_call"]["name"]
             function_to_call = available_functions[function_name]
             function_args = json.loads(response_message["function_call"]["arguments"])
-            
             function_response = function_to_call(
                 stock_name=function_args.get("chosen_stock"),
                 time=function_args.get("time")
