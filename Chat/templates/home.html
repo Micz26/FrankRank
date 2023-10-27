@@ -36,10 +36,19 @@
                         {% csrf_token %}
                         <div class="ui action input">
                             <button type="submit" name="new_chat" class="ui button"  href="/chat/{{new_obj_id}}">New Chat</button>
-                            <div class="ui divider"></div>
-
+                        </div>
+                        </form>
+                            <div class="ui divider">
+                        <form method="POST">
+                        {% csrf_token %}
+                            <div class="ui vertical menu">
+                                {% for chat_id in chat_ids %}
+                                    <a class="item" href="/chat/{{chat_id}}">{{ chat_id }}</a>
+                                {% endfor %}
+                            </div>
+                        </form>
                     </div>
-            </form>
+
             </div>
         </div>
     </div>

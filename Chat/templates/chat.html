@@ -31,10 +31,22 @@
                             <div class="ui divider"></div>
                             <button type="submit" class="ui button">Change Category</button>
                         </div>
+                        </form>
+                        <form method="POST">
+                        {% csrf_token %}
                         <div class="ui action input">
-                            <a href="/chat/{{new_obj_id}}" class="ui button">New Chat</a>
-                            <div class="ui divider"></div>
-                    </div>
+                            <button type="submit" name="new_chat" class="ui button"  href="/chat/{{new_obj_id}}">New Chat</button>
+                        </div>
+                        </form>
+                        <div class="ui divider"></div>
+                        <form method="POST">
+                        {% csrf_token %}
+                        <div class="ui vertical menu">
+                            {% for chat_id in chat_ids %}
+                                <a class="item" href="/chat/{{chat_id}}">{{ chat_id }}</a>
+                            {% endfor %}
+                        </div>
+                    </form>
             </div>
         </div>
     </div>
@@ -54,7 +66,8 @@
                     {{ reply_content }}
                 </div>
             {% endif %}
-
+            <form method="POST">
+            {% csrf_token %}
             <div class="ui form">
                 <div class="prompt-field">
                         <div class="ui fluid action input">
