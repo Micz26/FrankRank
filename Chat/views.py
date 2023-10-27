@@ -124,8 +124,8 @@ def home(request):
             chat_ids_queryset = ChatInfo.objects.filter(user=user, category=category)
             chat_ids = list(chat_ids_queryset.values_list('id_chat', flat=True))
             if not ChatInfo.objects.filter(user=user, category=category).exists():
-                conversation = ChatConversation(user, 20, api_key)
-                chatTimeline = conversation.get_gptResponse("Say short hello to user")
+                new_conversation = ChatConversation(user, 20, api_key)
+                chatTimeline = new_conversation.get_gptResponse("Say short hello to user")
                 obj = ChatInfo(user=user, chat=str(chatTimeline), category=category)
                 obj.save()
             else:
@@ -190,7 +190,8 @@ def chat(request, pk):
             obj.chat = str(chatTimeline)
             obj.save()
         elif 'new_chat' in request.POST:
-            new_chatTimeline = conversation.get_gptResponse("Say short hello to user")
+            new_conversation = ChatConversation(user, 20, api_key)
+            new_chatTimeline = new_conversation.get_gptResponse("Say short hello to user")
             new_obj = ChatInfo(user=user, chat=str(new_chatTimeline), category=obj.category)
             new_obj.save()
             new_obj_id = new_obj.id_chat
@@ -199,9 +200,9 @@ def chat(request, pk):
             chat_ids_queryset = ChatInfo.objects.filter(user=user, category=category)
             chat_ids = list(chat_ids_queryset.values_list('id_chat', flat=True))
             if not ChatInfo.objects.filter(user=user, category=category).exists():
-                conversation = ChatConversation(user, 20, api_key)
-                chatTimeline = conversation.get_gptResponse("Say short hello to user")
-                obj = ChatInfo(user=user, chat=str(chatTimeline), category=category)
+                new_conversation = ChatConversation(user, 20, api_key)
+                new_chatTimeline = new_conversation.get_gptResponse("Say short hello to user")
+                obj = ChatInfo(user=user, chat=str(new_chatTimeline), category=category)
                 obj.save()
             else:
                 obj2 = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
