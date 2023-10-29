@@ -4,7 +4,7 @@ import json
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.offline import plot
-
+from scrapers import Yahoo
 
 class ChatConversation:
     """ Class dedicated for controling chat GPT integration 
@@ -126,7 +126,22 @@ class ChatConversation:
 
         return json.dumps(stock_data), div
     
-    
+    def show_newsPLUSArticles(stock_name= "MCD", time=None):
+        news_data = yf.Ticker(stock_name).news
+        filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
+
+
+        news_info = []
+        for news in filtered_news[-3:]:
+            title = news['title']
+            link = news['link']
+            scrap = Yahoo(link)
+            article = scrap.get_soupTextYahoo()
+            news_info.append((title, link, article))
+
+        return json.dumps(news_info), None
+
+
     def get_gptFunction(self, message):
         self.messages.append(
             {"role": "user", "content": message},
