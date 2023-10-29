@@ -7,10 +7,12 @@ import bcrypt
 
 User = get_user_model()
 
+
 # Hash mail
 def hash_email(email):
     hashed_email = bcrypt.hashpw(email.encode('utf-8'), bcrypt.gensalt())
     return hashed_email.decode('utf-8')
+
 
 # Hash open ai api key
 def hash_api_key(api_key):
@@ -29,6 +31,7 @@ class Profile(models.Model):
         self.email = hash_email(self.email)
         self.openai_api_key = hash_api_key(self.openai_api_key)
         super(Profile, self).save(*args, **kwargs)
+
     def __str__(self):
         return self.user.username
 
@@ -45,7 +48,8 @@ class UserInfo(models.Model):
 
     def __str__(self):
         return {self.user.id_user}
-    
+
+
 class ChatInfo(models.Model):
     id_chat = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.CharField(max_length=100)
@@ -55,6 +59,6 @@ class ChatInfo(models.Model):
 
     def save(self, *args, **kwargs):
         super(ChatInfo, self).save(*args, **kwargs)
-        
+
     def __str__(self):
         return self.id_user

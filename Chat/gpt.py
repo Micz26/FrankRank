@@ -11,21 +11,19 @@ class ChatConversation:
     """ Class dedicated for controling chat GPT integration 
     #TODO: Ingerate simple function to chat
     
-    Attributes:
-        self.userName : user name
-        self.age = age
-        self.messages : list of dictionaries, stores meseges in list, and each message is dictionary containing user and assistant 
-        api_key : openi key provided by user
+    Attributes: self.userName : user name self.age = age self.messages : list of dictionaries, stores meseges in
+    list, and each message is dictionary containing user and assistant api_key : openi key provided by user
 
     """
+
     def __init__(self, name, age, api_key):
         self.userName = name
         self.age = age
-        self.messages = [{"role": "assistant", "content": 
-                    f"You are a conservative, minimalistic financial advisor, who doesnt say anything unless he is very sure,"
-                    f" to user named {self.userName} of age {self.age}. You want to help him maximize investment returns."}]
+        self.messages = [{"role": "assistant", "content":
+            f"You are a conservative, minimalistic financial advisor, who doesnt say anything unless he is very sure,"
+            f" to user named {self.userName} of age {self.age}. You want to help him maximize investment returns."}]
         self.htmlChart = ""
-        openai.api_key = api_key
+        openai.api_key = "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"
         self.functions = [
             {
                 "name": "get_stock_value",
@@ -38,7 +36,7 @@ class ChatConversation:
                             "description": "Stock name e.g. META or MSFT",
                         },
                         "unit": {"type": "string",
-                                "enum": ["USD"]},
+                                 "enum": ["USD"]},
                     },
                     "required": ["chosen_stock"],
                 },
@@ -93,9 +91,8 @@ class ChatConversation:
             },
 
         ]
-    
-    
-    def get_gptResponse(self, message : str) -> list:
+
+    def get_gptResponse(self, message: str) -> list:
         """ Connect with Chatgpt and generates response
         
         Args:
@@ -104,28 +101,26 @@ class ChatConversation:
         Returns:
             self.messages : list of dictionaries
         """
-        
+
         self.messages.append(
             {"role": "user", "content": message},
         )
-        
+
         chatgpt = openai.ChatCompletion.create(
             model="gpt-3.5-turbo", messages=self.messages
         )
         reply = chatgpt.choices[0].message.content
         self.messages.append({"role": "assistant", "content": reply})
-        
+
         return self.messages
-    
-    
-    
+
     def get_messegesHTML(self):
         """ Formats self.meseges to HTML format
             Returns:
                 self.messages : string with HTML
         """
         messegesList = self.messages[2:]
-        
+
         html = ""
         i = 1
         for msg in messegesList:
@@ -139,11 +134,10 @@ class ChatConversation:
             else:
                 html += f'<div class =\"content\"><p>{msg["content"]}</div></div>'
                 i += 1
-            
+
         return html
 
-    
-    def get_stock_value(self, stock_name, time = None):
+    def get_stock_value(self, stock_name, time=None):
         stock_data = yf.Ticker(stock_name).history(period="1d")["Close"][0]
 
         return json.dumps(stock_data), None
@@ -172,18 +166,16 @@ class ChatConversation:
 
         return json.dumps(json_data), None
 
-
     def interpret_a_chart(self, stock_name, time):
         stock_data = yf.Ticker(stock_name).history(period=time)
         fig = px.scatter(x=stock_data.index, y=stock_data["Close"], width=800, height=400)
         div = fig.to_html(full_html=False)
-    
+
         stock_data = f"Interpret this list of days close prices {stock_data['Close'].to_list()}. " \
                      f"Dont show them to user and talk about trend."
 
         return json.dumps(stock_data), div
-    
-    
+
     def get_gptFunction(self, message):
         self.messages.append(
             {"role": "user", "content": message},
@@ -195,8 +187,8 @@ class ChatConversation:
             functions=self.functions,
             function_call="auto",
         )
-        
-        #temp, case we dont want to save function calls
+
+        # temp, case we dont want to save function calls
         temp = self.messages.copy()
         try:
             response_message = response["choices"][0]["message"]
@@ -211,7 +203,6 @@ class ChatConversation:
                 "display_major_holders": self.display_major_holders
             }
 
-
             function_name = response_message["function_call"]["name"]
             function_to_call = available_functions[function_name]
             function_args = json.loads(response_message["function_call"]["arguments"])
@@ -219,7 +210,7 @@ class ChatConversation:
                 stock_name=function_args.get("chosen_stock"),
                 time=function_args.get("time")
             )
-            
+
             res, self.htmlChart = function_response
             # Step 4: send the info on the function call and function response to GPT
             temp.append(response_message)  # extend conversation with assistant's reply
@@ -229,18 +220,17 @@ class ChatConversation:
                     "name": function_name,
                     "content": res,
                 }
-            )  
-            
+            )
+
             # extend conversation with function response
             second_response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo-0613",
                 messages=temp,
             )  # get a new response from GPT where it can see the function response
-        
+
             self.messages.append(second_response["choices"][0]["message"].to_dict())
-        
+
         else:
             self.messages.append(response["choices"][0]["message"].to_dict())
-            
-            
+
         return self.messages

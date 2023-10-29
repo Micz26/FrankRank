@@ -10,29 +10,29 @@ from .gpt import ChatConversation
 from .models import Profile, ChatInfo, UserInfo
 import json
 
+
 def signup(request):
-    
-    #TODO: Create HTML template and backend for User model, with openai validation
-    #TODO: Create template and backend for changing data in model
-    #TODO: Veryfi user email
-    #TODO: Sigup with google, github
-    
+    # TODO: Create HTML template and backend for User model, with openai validation
+    # TODO: Create template and backend for changing data in model
+    # TODO: Veryfi user email
+    # TODO: Sigup with google, github
+
     if request.method == "POST":
         username = request.POST['username']
         email = request.POST['email']
         password = request.POST['password']
         password2 = request.POST['password2']
         openai_api_key = request.POST['Open ai api key']
-        
+
         if password2 == password:
             if User.objects.filter(email=email).exists():
                 messages.info(request, 'Ten email jest zajęty')
                 return redirect('signup')
-            
+
             elif User.objects.filter(username=username).exists():
                 messages.info(request, 'Nazwa użytkownia jest zajęta')
                 return redirect('signup')
-            
+
             else:
 
                 user = User.objects.create_user(username=username, email=email, password=password)
@@ -41,18 +41,20 @@ def signup(request):
                 user_login = auth.authenticate(username=username, password=password)
                 auth.login(request, user_login)
                 user_model = User.objects.get(username=username)
-                new_profile = Profile.objects.create(user=user_model, id_user=user_model.id, openai_api_key=openai_api_key)
+                new_profile = Profile.objects.create(user=user_model, id_user=user_model.id,
+                                                     openai_api_key=openai_api_key)
                 new_profile.save()
                 return redirect('/settings')
         else:
             messages.info(request, 'Hasła nie są takie same')
             return redirect('signup')
-        
+
     else:
         return render(request, 'signup.html')
 
+
 def signin(request):
-    #TODO: Sign in with github, google
+    # TODO: Sign in with github, google
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
@@ -67,34 +69,33 @@ def signin(request):
     else:
         return render(request, 'signin.html')
 
+
 @login_required(login_url='signin')
 def logout(request):
     auth.logout(request)
     return redirect('signin')
 
 
-
 @login_required(login_url='signin')
 def home(request):
     messages_ = []
     reply_content = ''
-    api_key = "api_key"
+    api_key = "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"
     user = request.user.username
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
 
+    # TODO : Reset user chat(add chat ID and current chat ID to ChatInfo model)
+    # TODO : Integrate home function with ORM models
+    # TODO : Create multimple chat categories
+    # TODO : Organize code in diffrent files as soon it will be huge mess
 
-    #TODO : Reset user chat(add chat ID and current chat ID to ChatInfo model)
-    #TODO : Integrate home function with ORM models
-    #TODO : Create multimple chat categories
-    #TODO : Organize code in diffrent files as soon it will be huge mess
-    
     # declaring ChatConversation class for gpt
     conversation = ChatConversation(user, 20, api_key)
     chats = ChatInfo.objects.filter(user=user)
     chat_category = ''
     chat_ids = []
 
-    #checkig if chat was previously generated and if not generating promt saying hello
+    # checkig if chat was previously generated and if not generating promt saying hello
     if not ChatInfo.objects.filter(user=user).exists():
         chatTimeline = conversation.get_gptResponse("Say short hello to user")
         obj = ChatInfo(user=user, chat=str(chatTimeline))
@@ -105,14 +106,13 @@ def home(request):
         chat_category = obj.category
         for chat in chats:
             chat_ids.append(chat.id_chat)
-    
-    
+
     # must use list(eval(str)) to convert single string to list of dictionaries
     conversation.messages = list(eval(obj.chat))
     if request.method == "POST":
         prompt = request.POST["prompt"]
         if prompt is not None and prompt != '':
-            chatTimeline  = conversation.get_gptFunction(prompt)
+            chatTimeline = conversation.get_gptFunction(prompt)
             obj.chat = str(chatTimeline)
         new_category = request.POST["new_category"]
         if new_category is not None:
@@ -130,6 +130,7 @@ def home(request):
 
     return render(request, 'home.html', context=context)
 
+
 """def update_category(request):
     user = request.user.username
     if request.method == "POST" and request.is_ajax():
@@ -140,6 +141,7 @@ def home(request):
         return JsonResponse({"success": True})
     return JsonResponse({"success": False})"""
 
+
 @login_required(login_url='signin')
 def create_chat(request):
     if request.method == 'POST':
@@ -147,8 +149,10 @@ def create_chat(request):
 
     return redirect('home')
 
+
 def chat(request, pk):
     Chat = ChatInfo.objects.get(id_chat=pk)
+
 
 @login_required(login_url='signin')
 def settings(request):
@@ -156,7 +160,6 @@ def settings(request):
     user_info = UserInfo.objects.create(id_user=user_profile)
 
     if request.method == "POST":
-
         investments = request.POST.get('investments', '')
         sectors = request.POST.get('sectors', '')
         risk_level = request.POST.get('risk_level', '')
@@ -176,7 +179,3 @@ def settings(request):
         return redirect('settings')
 
     return render(request, 'settings.html', {'user_info': user_info})
-
-
-
-
