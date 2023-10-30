@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import random
 import regex as re
+import pandas as pd
 
 class Yahoo:
     def __init__(self, url : str = ''):
@@ -46,7 +47,6 @@ class NBP(Yahoo):
             soup = self.get_soup()
         
         classSoup = soup.find_all("div", {"class":"product-card"})
-        
         for item in classSoup[:-1]:
             revenue_symbol = re.compile('(?<=href=")(.*?)(?=">)')
             link = re.findall(revenue_symbol, str(item))[0]
@@ -54,3 +54,39 @@ class NBP(Yahoo):
             self.offertListLinks.append(link)
         
         return self.offertListLinks
+    
+    def get_bondOffer(self, link):
+        self.url = link
+        soup = self.get_soup()
+        labels = soup.find_all("strong", {"class":"product-details__list-label"})
+        values = soup.find_all("span", {"class":"product-details__list-value"})
+        
+        offer = {}
+        for i in range(len(labels)):
+            valuePattern = '(?<=>\n                                    )(.*?)(?=\n)'
+            val = re.findall(valuePattern, str(values[i]))[0]
+            valNoSpace = val.replace(" ", "")
+            if not val or not valNoSpace:
+                val = str(values[i].text)
+                val = val.replace("\n", "")
+                val = val.split()
+                val = ' '.join([str(elem) for elem in val])
+                val = val.replace(" Zobacz tabelę odsetkową", "")
+            
+            label = str(labels[i].text).split()
+            label = ' '.join([str(elem) for elem in label])
+            label = label.replace(":","")
+            
+            offer[label] = val                
+        return offer
+        
+    def get_nbpBondsDataframe(self):
+        if not self.offertListLinks:
+            self.offertListLinks = self.make_offertListLinks()
+        
+        dictList = []
+        for link in self.offertListLinks:
+            dictList.append(self.get_bondOffer(link))
+            
+        df = pd.DataFrame(dictList)
+        return df
