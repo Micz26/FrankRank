@@ -16,7 +16,7 @@
 <div class="three column row">
 
     <div class="four wide column">
-        <div class="ui tertiary segment" style="overflow-y: scroll; height: 50vw; margin-left: 1vw;">
+        <div class="ui tertiary segment" style="height: calc(100vh - 80px); margin-left: 1vw;">
             <div class = "ui segment">
                 <h3 class="ui header">Category - <div class="item">{{ chat_category }}</div></h3>
                     <form method="POST">
@@ -27,16 +27,16 @@
                                     <option class = "item" value="{{ category }}">{{ category }}</option>
                                 {% endfor %}
                             </select>
-                            <div class="ui divider"></div>
-                            <button type="submit" class="ui button">Change Category</button>
                         </div>
+                        <div class="ui divider"></div>
+                        <button type="submit" class="ui button">Change Category</button>
                     </div>
         </div>
     </div>
 
     <div class="eleven wide column" >
         <div class = "ui segment" >
-            <div id = "scroll" style="overflow-y: scroll; height: 46vw;">
+            <div id = "scroll" style="overflow-y: scroll; max-height: calc(100vh - 70px - 80px)">
                 {% for message in messages_ %}
                     <div class="alert alert-danger" role="alert">
                         {{ message }}
