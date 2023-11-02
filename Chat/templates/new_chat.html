@@ -19,30 +19,15 @@
         <div class="ui tertiary segment">
             <div class = "ui segment">
                 <h3 class="ui header">Category - <div class="item">{{ chat_category }}</div></h3>
-
-                    <form method="POST">
-                        {% csrf_token %}
-                        <div class="ui action input">
-                            <select name="new_category" class="ui dropdown">
-                                {% for category in chat_categories %}
-                                    <option class = "item" value="{{ category }}">{{ category }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="ui divider"></div>
-                            <button type="submit" class="ui button">Change Category</button>
-                        </div>
-                        </form>
                         <div class="ui action input">
                             <button type="button" class="ui button" id="newChatButton">New Chat</button>
                         </div>
-                            <div class="ui divider">
-                            <div class="ui vertical menu">
-                                {% for chat_id in chat_ids %}
-                                    <a class="item" href="/chat/{{chat_id}}">{{ chat_id }}</a>
-                                {% endfor %}
-                            </div>
-                    </div>
-
+                        <div class="ui divider"></div>
+                        <div class="ui vertical menu">
+                            {% for chat_id in chat_ids %}
+                                <a class="item" href="/chat/{{chat_id}}">{{ chat_id }}</a>
+                            {% endfor %}
+                        </div>
             </div>
         </div>
     </div>
@@ -63,7 +48,7 @@
                 </div>
             {% endif %}
             <form method="POST">
-                {% csrf_token %}
+            {% csrf_token %}
             <div class="ui form">
                 <div class="prompt-field">
                         <div class="ui fluid action input">
@@ -91,17 +76,3 @@
     });
 </script>
 {% endblock %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
