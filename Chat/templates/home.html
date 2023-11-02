@@ -28,9 +28,27 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        </form>
+                        <form method="POST">
+                        {% csrf_token %}
+                        <div class="ui action input">
+                            <button type="submit" name="new_chat" class="ui button"  href="/chat/{{new_obj_id}}">New Chat</button>
+                        </div>
+                        </form>
+                            <div class="ui divider">
+                        <form method="POST">
+                        {% csrf_token %}
+                            <div class="ui vertical menu">
+                                {% for chat_id in chat_ids %}
+                                    <a class="item" href="/chat/{{chat_id}}">{{ chat_id }}</a>
+                                {% endfor %}
+                            </div>
+                        </form>
+                    </div>
+
                         <div class="ui divider"></div>
                         <button type="submit" class="ui button">Change Category</button>
-                    </div>
+            </div>
         </div>
     </div>
 
@@ -47,13 +65,14 @@
                     objDiv.scrollTop = objDiv.scrollHeight;
                 </script>
             </div>
-        
+
             {% if reply_content %}
                 <div class="alert alert-success" role="alert">
                     {{ reply_content }}
                 </div>
             {% endif %}
-        
+            <form method="POST">
+                {% csrf_token %}
             <div class="ui form">
                 <div class="prompt-field">
                         <div class="ui fluid action input">
@@ -78,7 +97,6 @@
     });
 </script>
 {% endblock %}
-
 
 
 
