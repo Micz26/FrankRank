@@ -28,6 +28,7 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        <button type="submit" class="ui button">Change Category</button>
                         </form>
                         <form method="POST">
                         {% csrf_token %}
@@ -35,19 +36,15 @@
                             <button type="submit" name="new_chat" class="ui button"  href="/chat/{{new_obj_id}}">New Chat</button>
                         </div>
                         </form>
-                            <div class="ui divider">
+                        <div class="ui divider"></div>
                         <form method="POST">
                         {% csrf_token %}
                             <div class="ui vertical menu">
                                 {% for chat_id in chat_ids %}
                                     <a class="item" href="/chat/{{chat_id}}">{{ chat_id }}</a>
                                 {% endfor %}
-                            </div>
                         </form>
                     </div>
-
-                        <div class="ui divider"></div>
-                        <button type="submit" class="ui button">Change Category</button>
             </div>
         </div>
     </div>

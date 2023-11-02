@@ -4,7 +4,7 @@ import json
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.offline import plot
-from scrapers import Yahoo
+from .scrapers import Yahoo
 
 class ChatConversation:
     """ Class dedicated for controling chat GPT integration 
