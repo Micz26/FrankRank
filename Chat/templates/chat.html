@@ -33,21 +33,15 @@
                         </div>
                         </form>
                         <div class="ui divider"></div>
-                        <form method="POST">
-                        {% csrf_token %}
                         <div class="ui action input">
-                            <button type="submit" name="new_chat" class="ui button"  href="/chat/{{new_obj_id}}">New Chat</button>
+                            <button type="button" class="ui button" id="newChatButton" name="new_chat">New Chat</button>
                         </div>
-                        </form>
                         <div class="ui divider"></div>
-                        <form method="POST">
-                        {% csrf_token %}
                         <div class="ui vertical menu">
                             {% for chat_id in chat_ids %}
                                 <a class="item" href="/chat/{{chat_id}}">{{ chat_id }}</a>
                             {% endfor %}
                         </div>
-                    </form>
             </div>
         </div>
     </div>
@@ -90,6 +84,9 @@
 <script>
     $(document).ready(function(){
         $('#category-dropdown').dropdown();
+    });
+        document.getElementById("newChatButton").addEventListener("click", function() {
+        window.location.href = "/new_chat/{{ chat_category }}";
     });
 </script>
 {% endblock %}

@@ -31,10 +31,8 @@
                         
                         <button type="submit" class="ui button" >Change Category</button>
                         </form>
-                        <form method="POST">
-                        {% csrf_token %}
                         <div class="ui action input">
-                            <button type="submit" name="new_chat" class="ui button" >New Chat</button>
+                            <button type="button" class="ui button" id="newChatButton" name="new_chat">New Chat</button>
                         </div>
                         </form>
                         <div class="ui divider"></div>
@@ -92,6 +90,9 @@
 <script>
     $(document).ready(function(){
         $('#category-dropdown').dropdown();
+    });
+        document.getElementById("newChatButton").addEventListener("click", function() {
+        window.location.href = "/new_chat/{{ chat_category }}";
     });
 
     function refreshPage(){
