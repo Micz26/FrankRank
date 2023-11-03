@@ -81,7 +81,7 @@ def logout(request):
 @login_required(login_url='signin')
 def home(request):
     messages_ = []
-    api_key = "XXX"
+    api_key = "sk-"
     user = request.user.username
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
 
@@ -104,7 +104,6 @@ def home(request):
         obj = ChatInfo.objects.filter(user=user).order_by('-created_at').latest('created_at')
         chat_ids_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
         chat_ids = list(chat_ids_queryset.values_list('id_chat', flat=True))
-        print(chat_ids)
         new_obj_id = obj.id_chat
         
         if request.method == "POST":
@@ -159,7 +158,7 @@ def home(request):
 def chat(request, pk):
     obj = ChatInfo.objects.get(id_chat=pk)
     messages_ = []
-    api_key = "XXX"
+    api_key = "sk-"
     user = request.user.username
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
 
@@ -179,9 +178,6 @@ def chat(request, pk):
         chat_ids = []
         
     else:
-        #obj = ChatInfo.objects.filter(user=user, ca).order_by('-created_at').latest('created_at')
-        print("---------------------------")
-        print(obj.category)
         new_obj_id = obj.id_chat
    
         if request.method == "POST":
@@ -208,7 +204,6 @@ def chat(request, pk):
                     chatTimeline = new_conversation.get_gptResponse("Say short hello to user")
                     obj = ChatInfo(user=user, chat=str(chatTimeline), category=category)
                     obj.save()
-                    
                     
                 else:
                     obj2 = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')

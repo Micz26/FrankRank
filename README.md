@@ -14,3 +14,7 @@ python manage.py createsuperuser
 BAZADANYCH 
 pip install pyodbc
 pip install mssql-django
+
+python -m pip install azure-storage-blob
+python -m pip install azure-storage     
+python -m pip install kaleido 

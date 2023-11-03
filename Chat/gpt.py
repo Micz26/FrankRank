@@ -5,6 +5,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.offline import plot
 from .scrapers import Yahoo
+from .blob import uploadChartToBlobStorage
+import time
 
 class ChatConversation:
     """ Class dedicated for controling chat GPT integration 
@@ -101,7 +103,8 @@ class ChatConversation:
             else:
                 html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
             if self.htmlChart and i == len(messegesList):
-                html += f'<div class =\"content\"><p>{msg["content"] + self.htmlChart}</div></div>'
+                html += f'<div class =\"content\"><p>{msg["content"]}<div w3-include-html="{self.htmlChart}"></div></div>'
+                print(self.htmlChart)
                 self.htmlChart = ""
             else:
                 html += f'<div class =\"content\"><p>{msg["content"]}</div></div>'
@@ -121,10 +124,10 @@ class ChatConversation:
         stock_data = yf.Ticker(stock_name).history(period=time)
         fig = px.scatter(x=stock_data.index, y=stock_data["Close"], width=800, height=400)
         div = fig.to_html(full_html=False)
-    
+        url = uploadChartToBlobStorage(div, self.userName)
         stock_data = f"Interpret this list of days close prices {stock_data['Close'].to_list()}. Dont show them to user and talk about trend."
 
-        return json.dumps(stock_data), div
+        return json.dumps(stock_data), url
     
     def show_newsPLUSArticles(stock_name= "MCD", time=None):
         news_data = yf.Ticker(stock_name).news
