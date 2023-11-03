@@ -98,7 +98,9 @@ def home(request):
     
     # checkig if chat was previously generated and if not generating promt saying hello
     if not ChatInfo.objects.filter(user=user).exists():
-        createNewChatTimeline(obj, conversation, prompt = "Say short hello to user")
+        chatTimeline = conversation.get_gptResponse("Say short hello to user")
+        obj = ChatInfo(user=user, chat=str(chatTimeline), category='Personal Finance')
+        obj.save()
     else:
         obj = ChatInfo.objects.filter(user=user).order_by('-created_at').latest('created_at')
 
@@ -115,7 +117,9 @@ def home(request):
             
             if not ChatInfo.objects.filter(user=user, category=category).exists():
                 new_conversation = ChatConversation(user, 20, api_key)
-                createNewChatTimeline(obj, new_conversation, prompt = "Say short hello to user")
+                new_chatTimeline = new_conversation.get_gptResponse("Say short hello to user")
+                obj = ChatInfo(user=user, chat=str(new_chatTimeline), category=category)
+                obj.save()
             else:
                 obj = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
                                 
@@ -169,7 +173,9 @@ def chat(request, pk):
             
             if not ChatInfo.objects.filter(user=user, category=category).exists():
                 new_conversation = ChatConversation(user, 20, api_key)
-                createNewChatTimeline(obj, new_conversation, prompt = "Say short hello to user")
+                new_chatTimeline = new_conversation.get_gptResponse("Say short hello to user")
+                obj = ChatInfo(user=user, chat=str(new_chatTimeline), category=category)
+                obj.save()
             else:
                 obj = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
 
