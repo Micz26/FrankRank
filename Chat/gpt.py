@@ -8,6 +8,7 @@ from plotly.offline import plot
 from .scrapers import Yahoo
 from .blob import uploadChartToBlobStorage
 import time
+from .gpt_functions_desc import gpt_functions_descriptions
 
 class ChatConversation:
     """ Class dedicated for controling chat GPT integration 
@@ -26,73 +27,7 @@ class ChatConversation:
             f" to user named {self.userName} of age {self.age}. You want to help him maximize investment returns."}]
         self.htmlChart = ""
         openai.api_key = "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"
-        self.functions = [
-            {
-                "name": "get_stock_value",
-                "description": "Get the current value about the given stock",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "chosen_stock": {
-                            "type": "string",
-                            "description": "Stock name e.g. META or MSFT",
-                        },
-                        "unit": {"type": "string",
-                                 "enum": ["USD"]},
-                    },
-                    "required": ["chosen_stock"],
-                },
-            },
-
-            {
-                "name": "interpret_a_chart",
-                "description": "Interpret a list of given stock (1y or 1m or 1d)",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "chosen_stock": {
-                            "type": "string",
-                            "description": "Stock name e.g. META or ACN",
-                        },
-                        "time": {
-                            "type": "string",
-                            "enum": ["1y", "1m", "1d"]},
-                    },
-                    "required": ["chosen_stock", "time"],
-                },
-            },
-
-            {
-                "name": "show_news",
-                "description": "show a brief news about given stock",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "chosen_stock": {
-                            "type": "string",
-                            "description": "Stock name e.g. META or ACN",
-                        },
-                    },
-                    "required": ["chosen_stock"],
-                },
-            },
-
-            {
-                "name": "display_major_holders",
-                "description": "display major holders of given stock",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "chosen_stock": {
-                            "type": "string",
-                            "description": "Stock name e.g. META or ACN",
-                        },
-                    },
-                    "required": ["chosen_stock"],
-                },
-            },
-
-        ]
+        self.functions = gpt_functions_descriptions
 
     def get_gptResponse(self, message: str) -> list:
         """ Connect with Chatgpt and generates response
@@ -177,14 +112,13 @@ class ChatConversation:
         stock_data = f"Interpret this list of days close prices {stock_data['Close'].to_list()}. Dont show them to user and talk about trend."
 
         return json.dumps(stock_data), url
-    
-    def show_newsPLUSArticles(stock_name= "MCD", time=None):
+
+    def show_newsPLUSArticles(self, stock_name, time=None):
         news_data = yf.Ticker(stock_name).news
         filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
 
-
         news_info = []
-        for news in filtered_news[-3:]:
+        for news in filtered_news[-1:]:     # displaying more than one news might result in an error
             title = news['title']
             link = news['link']
             scrap = Yahoo(link)
@@ -218,7 +152,8 @@ class ChatConversation:
                 "get_stock_value": self.get_stock_value,
                 "interpret_a_chart": self.interpret_a_chart,
                 "show_news": self.show_news,
-                "display_major_holders": self.display_major_holders
+                "display_major_holders": self.display_major_holders,
+                "show_newsPLUSArticles": self.show_newsPLUSArticles
             }
 
             function_name = response_message["function_call"]["name"]
