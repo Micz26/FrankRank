@@ -146,6 +146,7 @@ def new_chat(request, category):
     return redirect('chat', pk=obj.id_chat)
 
 
+
 @login_required(login_url='signin')
 def chat(request, pk):
     obj = ChatInfo.objects.get(id_chat=pk)
@@ -187,6 +188,7 @@ def chat(request, pk):
     return render(request, 'home.html', context=context)
 
 
+
 @login_required(login_url='signin')
 def settings(request):
     user_profile = Profile.objects.get(user=request.user)
@@ -212,7 +214,3 @@ def settings(request):
         return redirect('settings')
 
     return render(request, 'settings.html', {'user_info': user_info})
-
-
-
-

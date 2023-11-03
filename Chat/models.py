@@ -8,6 +8,7 @@ import bcrypt
 User = get_user_model()
 
 
+
 # Hash mail
 def hash_email(email):
     hashed_email = bcrypt.hashpw(email.encode('utf-8'), bcrypt.gensalt())
