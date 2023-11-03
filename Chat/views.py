@@ -113,6 +113,16 @@ def home(request):
             chatTimeline = conversation.get_gptFunction(prompt)
             obj.chat = str(chatTimeline)
             obj.save()
+
+            messages_ = list(eval(obj.chat))
+            messages_ = [mark_safe(conversation.get_messegesHTML())]
+            context = {'messages_': messages_,
+                       'chat_ids': chat_ids,
+                       'chat_category': obj.category,
+                       'chat_categories': chat_categories,
+                       }
+
+            return render(request, 'home.html', context=context)
         elif "new_category" in request.POST:
             category = request.POST["new_category"]
             chat_ids_queryset = ChatInfo.objects.filter(user=user, category=category)
@@ -125,15 +135,7 @@ def home(request):
             else:
                 obj2 = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
                 obj = obj2
-            messages_ = list(eval(obj.chat))
-            messages_ = [mark_safe(conversation.get_messegesHTML())]
-        context = {'messages_': messages_,
-                   'chat_ids': chat_ids,
-                   'chat_category': obj.category,
-                   'chat_categories': chat_categories,
-                   }
-
-        return render(request, 'home.html', context=context)
+            return redirect('chat', pk=obj.id_chat)
     else:
         messages_ = list(eval(obj.chat))
         messages_ = [mark_safe(conversation.get_messegesHTML())]
@@ -192,6 +194,16 @@ def chat(request, pk):
             chatTimeline = conversation.get_gptFunction(prompt)
             obj.chat = str(chatTimeline)
             obj.save()
+
+            messages_ = list(eval(obj.chat))
+            messages_ = [mark_safe(conversation.get_messegesHTML())]
+            context = {'messages_': messages_,
+                       'chat_ids': chat_ids,
+                       'chat_category': obj.category,
+                       'chat_categories': chat_categories,
+                       }
+
+            return render(request, 'chat.html', context=context)
         elif "new_category" in request.POST:
             category = request.POST["new_category"]
             chat_ids_queryset = ChatInfo.objects.filter(user=user, category=category)
@@ -204,15 +216,9 @@ def chat(request, pk):
             else:
                 obj2 = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
                 obj = obj2
-        messages_ = list(eval(obj.chat))
-        messages_ = [mark_safe(conversation.get_messegesHTML())]
-        context = {'messages_': messages_,
-                   'chat_ids': chat_ids,
-                   'chat_category': obj.category,
-                   'chat_categories': chat_categories,
-                   }
 
-        return render(request, 'chat.html', context=context)
+            return redirect('chat', pk=obj.id_chat)
+
     else:
         messages_ = list(eval(obj.chat))
         messages_ = [mark_safe(conversation.get_messegesHTML())]
