@@ -148,60 +148,22 @@ def home(request):
 
 @login_required(login_url='signin')
 def new_chat(request, category):
-    messages_ = []
-    api_key = open("C:\\Users\\mikol\\OneDrive\\Dokumenty\\key.txt", "r").read().strip("\n")
     user = request.user.username
-    chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
 
-    # declaring ChatConversation class for gpt
-    conversation = ChatConversation(user, 20, api_key)
-    chatTimeline = conversation.get_gptResponse("Say short hello to user")
+    api_key = open("C:\\Users\\mikol\\OneDrive\\Dokumenty\\key.txt", "r").read().strip("\n")
+
+    chatTimeline = ChatConversation(user, 20, api_key).get_gptResponse("Say short hello to user")
     obj = ChatInfo(user=user, chat=str(chatTimeline), category=category)
     obj.save()
 
-    chat_ids_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
-    chat_ids = list(chat_ids_queryset.values_list('id_chat', flat=True))
-    # must use list(eval(str)) to convert single string to list of dictionaries
-    conversation.messages = list(eval(obj.chat))
+    return redirect('chat', pk=obj.id_chat)
 
-    messages_ = list(eval(obj.chat))
-    messages_ = [mark_safe(conversation.get_messegesHTML())]
-    context = {'messages_': messages_,
-               'chat_ids': chat_ids,
-               'chat_category': obj.category,
-               'chat_categories': chat_categories
-               }
-    if request.method == "POST":
-        if 'prompt' in request.POST:
-            prompt = request.POST["prompt"]
-            chatTimeline = conversation.get_gptFunction(prompt)
-            obj.chat = str(chatTimeline)
-            obj.save()
-        messages_ = list(eval(obj.chat))
-        messages_ = [mark_safe(conversation.get_messegesHTML())]
-        context = {'messages_': messages_,
-                   'chat_ids': chat_ids,
-                   'chat_category': obj.category,
-                   'chat_categories': chat_categories,
-                   }
 
-        return render(request, 'new_chat.html', context=context)
-    else:
-        messages_ = list(eval(obj.chat))
-        messages_ = [mark_safe(conversation.get_messegesHTML())]
-        context = {'messages_': messages_,
-                   'chat_ids': chat_ids,
-                   'chat_category': obj.category,
-                   'chat_categories': chat_categories
-                   }
-
-        return render(request, 'new_chat.html', context=context)
 
 
 @login_required(login_url='signin')
 def chat(request, pk):
     obj = ChatInfo.objects.get(id_chat=pk)
-    messages_ = []
     api_key = open("C:\\Users\\mikol\\OneDrive\\Dokumenty\\key.txt", "r").read().strip("\n")
     user = request.user.username
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
