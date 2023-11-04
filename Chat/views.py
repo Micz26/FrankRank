@@ -173,7 +173,7 @@ def chat(request, pk):
                 obj = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
 
             return redirect('chat', pk=obj.id_chat)
-
+        
     chat_categories.remove(str(obj.category))
     chat_categories = [str(obj.category)] + chat_categories
     conversation.messages = list(eval(obj.chat))

@@ -1,6 +1,7 @@
 import openai
 import yfinance as yf
 import json
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.offline import plot
@@ -8,24 +9,8 @@ from .scrapers import Yahoo
 from .blob import uploadChartToBlobStorage
 import time
 
-class ChatConversation:
-    """ Class dedicated for controling chat GPT integration 
-    #TODO: Ingerate simple function to chat
-    
-    Attributes:
-        self.userName : user name
-        self.age = age
-        self.messages : list of dictionaries, stores meseges in list, and each message is dictionary containing user and assistant 
-        api_key : openi key provided by user
-
-    """
-    def __init__(self, name, age, api_key):
-        self.userName = name
-        self.age = age
-        self.messages = [{"role": "assistant", "content": 
-                    f"You are a conservative financial advisor to user named {self.userName} of age {self.age}. You want to help him maximize investment returns."}]
-        self.htmlChart = ""
-        openai.api_key  = api_key
+class ChatFunctions:
+    def __init__(self):
         self.functions = [
             {
                 "name": "get_stock_value",
@@ -62,6 +47,28 @@ class ChatConversation:
                 },
             }
         ]
+
+class ChatConversation(ChatFunctions):
+    """ Class dedicated for controling chat GPT integration 
+    
+    Attributes:
+        self.userName : user name
+        self.age = age
+        self.messages : list of dictionaries, stores meseges in list, and each message is dictionary containing user and assistant 
+        api_key : openi key provided by user
+
+    """
+    def __init__(self, name, age, api_key):
+        super().__init__()
+        self.userName = name
+        self.age = age
+        self.messages = [{"role": "assistant", "content": 
+                    f"You are a conservative financial advisor to user named {self.userName} of age {self.age}. You want to help him maximize investment returns."}]
+        self.htmlChart = ""
+        openai.api_key  = api_key
+        self.messagesJSON = []
+        self.urlList = [None]
+
     
     
     def get_gptResponse(self, message : str) -> list:
@@ -83,7 +90,7 @@ class ChatConversation:
         )
         reply = chatgpt.choices[0].message.content
         self.messages.append({"role": "assistant", "content": reply})
-        
+        self.urlList.append(None)
         return self.messages
     
     
@@ -177,8 +184,9 @@ class ChatConversation:
             )
             
             res, self.htmlChart = function_response
-            # Step 4: send the info on the function call and function response to GPT
-            temp.append(response_message)  # extend conversation with assistant's reply
+            self.urlList.append(self.htmlChart)
+           
+            temp.append(response_message)
             temp.append(
                 {
                     "role": "function",
@@ -187,16 +195,55 @@ class ChatConversation:
                 }
             )  
             
-            # extend conversation with function response
             second_response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo-0613",
                 messages=temp,
-            )  # get a new response from GPT where it can see the function response
+            )  
         
             self.messages.append(second_response["choices"][0]["message"].to_dict())
         
         else:
             self.messages.append(response["choices"][0]["message"].to_dict())
             
-            
         return self.messages
+
+    def convertMessegesToJSON(self):
+        """ Converts self.messeegs to self.messagesJSON with columns response, promt, url
+            ***Zbieranie url obecnie nie działa, muszę znaleść metodę efektywnego zapisywania, można wsm od razu po response
+               zapisywać równolegle 2 formy 
+            Returns:
+                self.messagesJSON
+        """
+        i = 0
+        row = {}
+        for item in self.messages:
+            if item["role"] == "assistant":
+                row["response"] = item["content"]
+            elif item["role"] == "user":
+                row["promt"] = item["content"]
+            
+            if i == 2:
+                #row["url"] = self.urlList[len(self.messagesJSON) - 1]
+                row["url"] = self.urlList[-1]
+                self.messagesJSON.append(row)
+                row = {}
+                i = 0
+            i += 1
+
+        self.messagesJSON = json.dumps(self.messagesJSON, indent=2)
+        
+        return self.messagesJSON
+    
+    def converJSONToMesseges(self):
+        if not self.messagesJSON:
+            self.convertMessegesToJSON()
+        
+        self.messeges = []
+        for item in self.messagesJSON:
+            rowAssistant = {"role" : "assistant", "content" : item["response"]}
+            rowUser = {"role" : "assistant", "content" : item["promt"]}
+            
+            self.messeges.append(rowAssistant)
+            self.messeges.append(rowUser)
+                
+        return self.messeges

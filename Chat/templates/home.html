@@ -21,24 +21,24 @@
                 <h3 class="ui header">Category - <div class="item">{{ chat_category }}</div></h3>
                     <form method="POST">
                         {% csrf_token %}
-                        <div class="ui action input">
-                            <select name="new_category" class="ui dropdown">
+                        <div class="ui action fluid input">
+                            <select name="new_category" class="ui fluid dropdown">
                                 {% for category in chat_categories %}
                                     <option class = "item" value="{{ category }}">{{ category }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         
-                        <button type="submit" class="ui button" >Change Category</button>
+                        <button type="submit" class="ui fluid button" >Change Category</button>
+                        <div class="ui divider"></div>
                         </form>
-                        <div class="ui action input">
-                            <button type="button" class="ui button" id="newChatButton" name="new_chat">New Chat</button>
+                        <div class="ui action fluid input">
+                            <button type="button" class="ui fluid button" id="newChatButton" name="new_chat">New Chat</button>
                         </div>
                         </form>
-                        <div class="ui divider"></div>
                         <form method="POST">
                         {% csrf_token %}
-                            <div class="ui vertical menu">
+                            <div class="ui vertical fluid menu">
                                 {% for chat_id in chat_ids %}
                                     <a class="item" href="/chat/{{chat_id}}">{{ chat_id }}</a>
                                 {% endfor %}
