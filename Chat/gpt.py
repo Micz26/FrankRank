@@ -2,10 +2,8 @@ import openai
 import yfinance as yf
 import json
 import pandas as pd
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.offline import plot
+import matplotlib.pyplot as plt
+import seaborn as sns
 from .scrapers import Yahoo
 from .blob import uploadChartToBlobStorage
 import time
@@ -86,7 +84,6 @@ class ChatConversation(ChatFunctions):
         self.messages.append(
             {"role": "user", "content": message},
         )
-
         chatgpt = openai.ChatCompletion.create(
             model="gpt-3.5-turbo", messages=self.messages
         )
@@ -125,9 +122,10 @@ class ChatConversation(ChatFunctions):
 
     def interpret_a_chart(self, stock_name, time):
         stock_data = yf.Ticker(stock_name).history(period=time)
-        fig = px.scatter(x=stock_data.index, y=stock_data["Close"], width=800, height=400)
-        div = fig.to_html(full_html=False)
-        url = uploadChartToBlobStorage(div, self.userName)
+        plt.figure(figsize=(14,5))
+        fig = sns.lineplot(data=stock_data,x="Date",y='Close')
+
+        url = uploadChartToBlobStorage(fig, self.userName)
         stock_data = f"Interpret this list of days close prices {stock_data['Close'].to_list()}. Dont show them to user and talk about trend."
 
         return json.dumps(stock_data), url
@@ -147,6 +145,7 @@ class ChatConversation(ChatFunctions):
         return json.dumps(news_info), None
 
     def get_gptFunction(self, message):
+        url = None
         self.messages.append(
             {"role": "user", "content": message},
         )
@@ -161,7 +160,7 @@ class ChatConversation(ChatFunctions):
         # temp, case we dont want to save function calls
         temp = self.messages.copy()
         response_message = response["choices"][0]["message"]
-
+        
         if response_message.get("function_call"):
             available_functions = {
                 "get_stock_value": self.get_stock_value,
@@ -177,9 +176,8 @@ class ChatConversation(ChatFunctions):
                 time=function_args.get("time")
             )
 
-            res, self.htmlChart = function_response
-            self.urlList.append(self.htmlChart)
-
+            res, url = function_response
+            print(url)
             temp.append(response_message)
             temp.append(
                 {
@@ -189,17 +187,16 @@ class ChatConversation(ChatFunctions):
                 }
             )
 
-            second_response = openai.ChatCompletion.create(
+            response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo-0613",
                 messages=temp,
             )
 
-            return second_response["choices"][0]["message"]["content"]
-
-        else:
-            self.messages.append(response["choices"][0]["message"].to_dict())
-
-        return response_message["content"]
+       
+        self.messages.append(response["choices"][0]["message"].to_dict())
+        response_message = response["choices"][0]["message"]
+        
+        return response_message["content"], url
 
     def convertMessegesToJSON(self):
         """ Converts self.messeegs to self.messagesJSON with columns response, prompt, url
@@ -264,7 +261,8 @@ class ChatConversation(ChatFunctions):
             html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
             html += f'<div class =\"content\"><p>{rowAssistant}</div></div>'
             if image:
-                html += f'<img class="ui fluid image" src={image}>'
+                chart = f'<img class="ui centered fluid image" src="{image}">'
+                html += chart
             
         self.messages = chathistory
         return html

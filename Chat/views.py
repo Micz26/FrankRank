@@ -83,10 +83,10 @@ def get_ChatId(user, obj):
     return chat_ids
 
 def makeFirstMessage(obj, conversation):
-        first_msg = "Say short hello to user"
-        first_respo = conversation.get_gptResponse("Say short hello to user")
-        first_message = ChatMessage(id_chat=obj, prompt=first_msg, response=first_respo)
-        first_message.save()
+    first_msg = "Say short hello to user"
+    first_respo = conversation.get_gptResponse("Say short hello to user")
+    first_message = ChatMessage(id_chat=obj, prompt=first_msg, response=first_respo)
+    first_message.save()
 
 @login_required(login_url='signin')
 def home(request):
@@ -104,7 +104,6 @@ def home(request):
     else:
         obj = ChatInfo.objects.filter(user=user).order_by('-created_at').latest('created_at')
 
-
     chat_ids = get_ChatId(user, obj)
     chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat)
     if chat_messages.exists():
@@ -114,8 +113,8 @@ def home(request):
     if request.method == "POST":
         if 'prompt' in request.POST:
             prompt = request.POST["prompt"]
-            response = conversation.get_gptFunction(prompt)
-            new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response)
+            response, image = conversation.get_gptFunction(prompt)
+            new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response, image = image)
             new_msg.save()
 
         elif "new_category" in request.POST:
@@ -171,8 +170,8 @@ def chat(request, pk):
     if request.method == "POST":
         if 'prompt' in request.POST:
             prompt = request.POST["prompt"]
-            response = conversation.get_gptFunction(prompt)
-            new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response)
+            response, image = conversation.get_gptFunction(prompt)
+            new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response, image = image)
             new_msg.save()
             
         elif "new_category" in request.POST:
