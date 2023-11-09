@@ -33,7 +33,7 @@ class ChatConversation(ChatFunctions):
         self.messages = [{"role": "assistant", "content":
             f"You are a conservative financial advisor to user named {self.userName} of age {self.age}. You want to help him maximize investment returns."}]
         self.htmlChart = ""
-        openai.api_key = api_key
+        openai.api_key = "api_key"
         self.messagesJSON = []
         self.urlList = [None]
 
@@ -110,6 +110,30 @@ class ChatConversation(ChatFunctions):
             news_info.append((title, link, article))
 
         return json.dumps(news_info), None
+
+    def show_news(self, stock_name, time=None):
+        news_data = yf.Ticker(stock_name).news
+        filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
+
+        news_info = []
+        for news in filtered_news[-3:]:
+            title = news['title']
+            link = news['link']
+            news_info.append((title, link))
+
+        return json.dumps(news_info), None
+
+    def display_major_holders(self, stock_name, time):
+        holders_data = yf.Ticker(stock_name).major_holders
+        print(holders_data)
+        df = pd.DataFrame(holders_data)
+
+        df.columns = ['Percentage', 'Description']
+        json_data = df.to_json(orient='records', lines=True)
+        with open('holders_data.json', 'w') as f:
+            f.write(json_data)
+
+        return json.dumps(json_data), None
 
     def get_gptFunction(self, message):
         url = None
