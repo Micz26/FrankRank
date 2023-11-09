@@ -7,46 +7,12 @@ import seaborn as sns
 from .scrapers import Yahoo
 from .blob import uploadChartToBlobStorage
 import time
+from .gpt_functions_desc import gpt_functions_descriptions
 from itertools import chain
 
 class ChatFunctions:
     def __init__(self):
-        self.functions = [
-            {
-                "name": "get_stock_value",
-                "description": "Get the current value about the given stock",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "chosen_stock": {
-                            "type": "string",
-                            "description": "Stock name e.g. META or MSFT",
-                        },
-                        "unit": {"type": "string",
-                                 "enum": ["USD"]},
-                    },
-                    "required": ["chosen_stock"],
-                },
-            },
-
-            {
-                "name": "interpret_a_chart",
-                "description": "Interpret a list of given stock (1y or 1m or 1d)",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "chosen_stock": {
-                            "type": "string",
-                            "description": "Stock name e.g. META or ACN",
-                        },
-                        "time": {
-                            "type": "string",
-                            "enum": ["1y", "1m", "1d"]},
-                    },
-                    "required": ["chosen_stock", "time"],
-                },
-            }
-        ]
+        self.functions = gpt_functions_descriptions
 
 
 class ChatConversation(ChatFunctions):
@@ -70,6 +36,7 @@ class ChatConversation(ChatFunctions):
         openai.api_key = api_key
         self.messagesJSON = []
         self.urlList = [None]
+
 
     def get_gptResponse(self, message: str) -> list:
         """ Connect with Chatgpt and generates response
@@ -130,12 +97,12 @@ class ChatConversation(ChatFunctions):
 
         return json.dumps(stock_data), url
 
-    def show_newsPLUSArticles(stock_name="MCD", time=None):
+    def show_newsPLUSArticles(self, stock_name, time=None):
         news_data = yf.Ticker(stock_name).news
         filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
 
         news_info = []
-        for news in filtered_news[-3:]:
+        for news in filtered_news[-1:]:     # displaying more than one news might result in an error
             title = news['title']
             link = news['link']
             scrap = Yahoo(link)
@@ -164,7 +131,10 @@ class ChatConversation(ChatFunctions):
         if response_message.get("function_call"):
             available_functions = {
                 "get_stock_value": self.get_stock_value,
-                "interpret_a_chart": self.interpret_a_chart
+                "interpret_a_chart": self.interpret_a_chart,
+                "show_news": self.show_news,
+                "display_major_holders": self.display_major_holders,
+                "show_newsPLUSArticles": self.show_newsPLUSArticles
             }
 
             function_name = response_message["function_call"]["name"]

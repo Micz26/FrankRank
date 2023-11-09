@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ec71ae9a-2f44-4276-a7e4-5a950fac4fb9" name="Changes" comment="Added function: displayin major holders">
+      <change afterPath="$PROJECT_DIR$/Chat/gpt_functions_desc.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Chat/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Chat/gpt.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/gpt.py" afterDir="false" />
@@ -13,6 +14,13 @@
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
