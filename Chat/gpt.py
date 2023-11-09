@@ -101,7 +101,7 @@ class ChatConversation(ChatFunctions):
                 self.messages : string with HTML
         """
         messegesList = self.messages[2:]
-        
+        self.htmlChart = "https://otomotodata.blob.core.windows.net/charts/chart_lukasz1699544511.png"
         html = ""
         i = 1
         for msg in messegesList:
@@ -109,10 +109,9 @@ class ChatConversation(ChatFunctions):
                 html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
             else:
                 html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
-            if self.htmlChart and i == len(messegesList):
-                html += f'<div class =\"content\"><p>{msg["content"]}<div w3-include-html="{self.htmlChart}"></div></div>'
-                print(self.htmlChart)
-                self.htmlChart = ""
+            if self.htmlChart and i == len(messegesList):                
+                chart = f'<img class="ui centered fluid image" src="{self.htmlChart}">'
+                html += f'<div class =\"content\"><p>{msg["content"]}{chart}</div></div>'
             else:
                 html += f'<div class =\"content\"><p>{msg["content"]}</div></div>'
                 i += 1
@@ -247,3 +246,21 @@ class ChatConversation(ChatFunctions):
             self.messeges.append(rowUser)
                 
         return self.messeges
+    
+    def convertMessegesObjToHTML(self, messages_):
+        result = messages_.values()
+        DictList = [entry for entry in result]
+
+        html = ""
+        for row in DictList:
+            rowAssistant = row["response"]
+            rowUser = row["prompt"]
+            image = row["image"]
+            html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
+            html += f'<div class =\"content\"><p>{rowAssistant}</div></div>'
+            if image:
+                html += f'<img class="ui fluid image" src={image}>'
+            html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
+            html += f'<div class =\"content\"><p>{rowUser}</div></div>'
+
+        return html
