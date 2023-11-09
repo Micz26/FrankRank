@@ -54,9 +54,19 @@ class UserInfo(models.Model):
 class ChatInfo(models.Model):
     id_chat = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.CharField(max_length=100)
-    chat = models.TextField()
     category = models.CharField(max_length=45, default="New Chat")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         super(ChatInfo, self).save(*args, **kwargs)
+
+
+class ChatMessage(models.Model):
+    id_chat = models.ForeignKey(ChatInfo, on_delete=models.CASCADE)
+    prompt = models.TextField()
+    response = models.TextField()
+    image = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        super(ChatMessage, self).save(*args, **kwargs)

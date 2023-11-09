@@ -4,7 +4,10 @@
     <list default="true" id="ec71ae9a-2f44-4276-a7e4-5a950fac4fb9" name="Changes" comment="Added function: displayin major holders">
       <change afterPath="$PROJECT_DIR$/Chat/gpt_functions_desc.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Chat/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Chat/gpt.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/gpt.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Chat/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -71,5 +74,16 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Added function: displayin major holders" />
     <option name="LAST_COMMIT_MESSAGE" value="Added function: displayin major holders" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Chat/admin.py</url>
+          <line>4</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -8,8 +8,8 @@ from django.utils.safestring import mark_safe
 from urllib.parse import quote
 
 
-from .gpt import ChatConversation
-from .models import Profile, ChatInfo, UserInfo
+from .gpt import ChatConversation, convertChatMessagesToMessages
+from .models import Profile, ChatInfo, UserInfo, ChatMessage
 import json
 
 
@@ -36,9 +36,10 @@ def signup(request):
                 return redirect('signup')
 
             else:
+
                 user = User.objects.create_user(username=username, email=email, password=password)
                 user.save()
-                
+
                 user_login = auth.authenticate(username=username, password=password)
                 auth.login(request, user_login)
                 user_model = User.objects.get(username=username)
@@ -68,7 +69,6 @@ def signin(request):
             auth.login(request, user)
             return redirect('/')
     else:
-        
         return render(request, 'signin.html')
 
 
@@ -77,58 +77,63 @@ def logout(request):
     auth.logout(request)
     return redirect('signin')
 
-
-def createNewChatTimeline(obj, conversation, prompt = "Say short hello to user"):
-    chatTimeline = conversation.get_gptFunction(prompt)
-    obj.chat = str(chatTimeline)
-    obj.save()
-
 def get_ChatId(user, obj):
     chat_ids_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
     chat_ids = list(chat_ids_queryset.values_list('id_chat', flat=True))
     return chat_ids
 
+def makeFirstMessage(obj, conversation):
+    first_msg = "Say short hello to user"
+    first_respo = conversation.get_gptResponse("Say short hello to user")
+    first_message = ChatMessage(id_chat=obj, prompt=first_msg, response=first_respo)
+    first_message.save()
+
 @login_required(login_url='signin')
 def home(request):
-    messages_ = []
     api_key = "XXX"
     user = request.user.username
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
+
+    # declaring ChatConversation class for gpt
     conversation = ChatConversation(user, 20, api_key)
-    
+
     # checkig if chat was previously generated and if not generating promt saying hello
     if not ChatInfo.objects.filter(user=user).exists():
-        chatTimeline = conversation.get_gptResponse("Say short hello to user")
-        obj = ChatInfo(user=user, chat=str(chatTimeline), category='Personal Finance')
+        obj = ChatInfo(user=user, category='Personal Finance')
         obj.save()
     else:
         obj = ChatInfo.objects.filter(user=user).order_by('-created_at').latest('created_at')
 
     chat_ids = get_ChatId(user, obj)
-    conversation.messages = list(eval(obj.chat))
+    chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat)
+    if chat_messages.exists():
+        conversation.messages = convertChatMessagesToMessages(chat_messages.order_by('created_at'))
+    else:
+        makeFirstMessage(obj, conversation)
     if request.method == "POST":
         if 'prompt' in request.POST:
             prompt = request.POST["prompt"]
-            createNewChatTimeline(obj, conversation, prompt = prompt)
+            response, image = conversation.get_gptFunction(prompt)
+            new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response, image = image)
+            new_msg.save()
 
         elif "new_category" in request.POST:
             category = request.POST["new_category"]
             chat_ids = get_ChatId(user, obj)
-            
             if not ChatInfo.objects.filter(user=user, category=category).exists():
-                new_conversation = ChatConversation(user, 20, api_key)
-                new_chatTimeline = new_conversation.get_gptResponse("Say short hello to user")
-                obj = ChatInfo(user=user, chat=str(new_chatTimeline), category=category)
+                obj = ChatInfo(user=user, category=category)
                 obj.save()
+                new_conversation = ChatConversation(user, 20, api_key)
+                makeFirstMessage(obj, new_conversation)
             else:
                 obj = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
-                                
+
             return redirect('chat', pk=obj.id_chat)
 
     chat_categories.remove(str(obj.category))
     chat_categories = [str(obj.category)] + chat_categories
-    messages_ = list(eval(obj.chat))
-    messages_ = [mark_safe(conversation.get_messegesHTML())]
+    messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
+    messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
     context = {'messages_': messages_,
                 'chat_ids': chat_ids,
                 'chat_category': obj.category,
@@ -141,14 +146,10 @@ def home(request):
 @login_required(login_url='signin')
 def new_chat(request, category):
     user = request.user.username
-
-    api_key = "XXX"
-    chatTimeline = ChatConversation(user, 20, api_key).get_gptResponse("Say short hello to user")
-    obj = ChatInfo(user=user, chat=str(chatTimeline), category=category)
+    obj = ChatInfo(user=user, category=category)
     obj.save()
 
     return redirect('chat', pk=obj.id_chat)
-
 
 
 @login_required(login_url='signin')
@@ -157,34 +158,38 @@ def chat(request, pk):
     api_key = "XXX"
     user = request.user.username
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
-    conversation = ChatConversation(user, 20, api_key)
+
     chat_ids = get_ChatId(user, obj)
-    
-    # must use list(eval(str)) to convert single string to list of dictionaries
-    conversation.messages = list(eval(obj.chat))
+    conversation = ChatConversation(user, 20, api_key)
+    chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat)
+    if chat_messages.exists():
+        conversation.messages = convertChatMessagesToMessages(chat_messages.order_by('created_at'))
+    else:
+        makeFirstMessage(obj, conversation)
+        
     if request.method == "POST":
         if 'prompt' in request.POST:
             prompt = request.POST["prompt"]
-            createNewChatTimeline(obj, conversation, prompt = prompt)
-
+            response, image = conversation.get_gptFunction(prompt)
+            new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response, image = image)
+            new_msg.save()
+            
         elif "new_category" in request.POST:
             category = request.POST["new_category"]
-            chat_ids = get_ChatId(user, obj)
-            
             if not ChatInfo.objects.filter(user=user, category=category).exists():
-                new_conversation = ChatConversation(user, 20, api_key)
-                new_chatTimeline = new_conversation.get_gptResponse("Say short hello to user")
-                obj = ChatInfo(user=user, chat=str(new_chatTimeline), category=category)
+                obj = ChatInfo(user=user, category=category)
                 obj.save()
+                new_conversation = ChatConversation(user, 20, api_key)
+                makeFirstMessage(obj, new_conversation)
             else:
                 obj = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
 
             return redirect('chat', pk=obj.id_chat)
-
+        
     chat_categories.remove(str(obj.category))
     chat_categories = [str(obj.category)] + chat_categories
-    conversation.messages = list(eval(obj.chat))
-    messages_ = [mark_safe(conversation.get_messegesHTML())]
+    messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
+    messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
     context = {'messages_': messages_,
                 'chat_ids': chat_ids,
                 'chat_category': obj.category,
@@ -192,7 +197,6 @@ def chat(request, pk):
                 }
 
     return render(request, 'home.html', context=context)
-
 
 
 @login_required(login_url='signin')
