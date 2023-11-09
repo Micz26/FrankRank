@@ -245,23 +245,29 @@ class ChatConversation(ChatFunctions):
     def convertMessegesObjToHTML(self, messages_):
         result = messages_.values()
         DictList = [entry for entry in result]
-
+        chathistory = []
         html = ""
-        for row in DictList:
+        for i, row in enumerate(DictList):
             rowAssistant = row["response"]
             rowUser = row["prompt"]
             image = row["image"]
+            
+            Assistant = {"role": "assistant", "content": rowAssistant}
+            User = {"role": "assistant", "content": rowUser}
+            chathistory.append(Assistant)
+            chathistory.append(User)
+            
+            if i > 0 and "Say short hello to user" not in rowUser:
+                html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
+                html += f'<div class =\"content\"><p>{rowUser}</div></div>'
+                
             html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
             html += f'<div class =\"content\"><p>{rowAssistant}</div></div>'
             if image:
                 html += f'<img class="ui fluid image" src={image}>'
-            html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
-            html += f'<div class =\"content\"><p>{rowUser}</div></div>'
-
+            
+        self.messages = chathistory
         return html
-
-
-
 
 
 

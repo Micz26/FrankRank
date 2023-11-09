@@ -77,19 +77,22 @@ def logout(request):
     auth.logout(request)
     return redirect('signin')
 
+def get_ChatId(user, obj):
+    chat_ids_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
+    chat_ids = list(chat_ids_queryset.values_list('id_chat', flat=True))
+    return chat_ids
+
+def makeFirstMessage(obj, conversation):
+        first_msg = "Say short hello to user"
+        first_respo = conversation.get_gptResponse("Say short hello to user")
+        first_message = ChatMessage(id_chat=obj, prompt=first_msg, response=first_respo)
+        first_message.save()
 
 @login_required(login_url='signin')
 def home(request):
-    messages_ = []
-    api_key = open("C:\\Users\\mikol\\OneDrive\\Dokumenty\\key.txt", "r").read().strip("\n")
+    api_key = "XXX"
     user = request.user.username
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
-
-
-    # TODO : Reset user chat(add chat ID and current chat ID to ChatInfo model)
-    # TODO : Integrate home function with ORM models
-    # TODO : Create multimple chat categories
-    # TODO : Organize code in diffrent files as soon it will be huge mess
 
     # declaring ChatConversation class for gpt
     conversation = ChatConversation(user, 20, api_key)
@@ -101,20 +104,13 @@ def home(request):
     else:
         obj = ChatInfo.objects.filter(user=user).order_by('-created_at').latest('created_at')
 
-    chat_categories.remove(str(obj.category))
-    chat_categories = [str(obj.category)] + chat_categories
 
-    chat_ids_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
-    chat_ids = list(chat_ids_queryset.values_list('id_chat', flat=True))
-
+    chat_ids = get_ChatId(user, obj)
     chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat)
     if chat_messages.exists():
         conversation.messages = convertChatMessagesToMessages(chat_messages.order_by('created_at'))
     else:
-        first_msg = "Say short hello to user"
-        first_respo = conversation.get_gptResponse(first_msg)
-        first_message = ChatMessage(id_chat=obj, prompt=first_msg, response=first_respo)
-        first_message.save()
+        makeFirstMessage(obj, conversation)
     if request.method == "POST":
         if 'prompt' in request.POST:
             prompt = request.POST["prompt"]
@@ -122,41 +118,30 @@ def home(request):
             new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response)
             new_msg.save()
 
-            messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
-            messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
-            context = {'messages_': messages_,
-                       'chat_ids': chat_ids,
-                       'chat_category': obj.category,
-                       'chat_categories': chat_categories,
-                       }
-
-            return render(request, 'home.html', context=context)
         elif "new_category" in request.POST:
             category = request.POST["new_category"]
-            chat_ids_queryset = ChatInfo.objects.filter(user=user, category=category)
-            chat_ids = list(chat_ids_queryset.values_list('id_chat', flat=True))
+            chat_ids = get_ChatId(user, obj)
             if not ChatInfo.objects.filter(user=user, category=category).exists():
                 obj = ChatInfo(user=user, category=category)
                 obj.save()
                 new_conversation = ChatConversation(user, 20, api_key)
-                new_msg = "Say short hello to user"
-                new_respo = new_conversation.get_gptResponse(new_msg)
-                new_message = ChatMessage(id_chat=obj, prompt=new_msg, response=new_respo)
-                new_message.save()
+                makeFirstMessage(obj, new_conversation)
             else:
-                obj2 = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
-                obj = obj2
-            return redirect('chat', pk=obj.id_chat)
-    else:
-        messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
-        messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
-        context = {'messages_': messages_,
-                   'chat_ids': chat_ids,
-                   'chat_category': obj.category,
-                   'chat_categories': chat_categories
-                   }
+                obj = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
 
-        return render(request, 'home.html', context=context)
+            return redirect('chat', pk=obj.id_chat)
+
+    chat_categories.remove(str(obj.category))
+    chat_categories = [str(obj.category)] + chat_categories
+    messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
+    messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
+    context = {'messages_': messages_,
+                'chat_ids': chat_ids,
+                'chat_category': obj.category,
+                'chat_categories': chat_categories
+                }
+
+    return render(request, 'home.html', context=context)
 
 
 @login_required(login_url='signin')
@@ -168,73 +153,51 @@ def new_chat(request, category):
     return redirect('chat', pk=obj.id_chat)
 
 
-
-
 @login_required(login_url='signin')
 def chat(request, pk):
     obj = ChatInfo.objects.get(id_chat=pk)
-    api_key = open("C:\\Users\\mikol\\OneDrive\\Dokumenty\\key.txt", "r").read().strip("\n")
+    api_key = "XXX"
     user = request.user.username
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
-    chat_categories.remove(str(obj.category))
-    chat_categories = [str(obj.category)] + chat_categories
 
-    chat_ids_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
-    chat_ids = list(chat_ids_queryset.values_list('id_chat', flat=True))
-
-    # declaring ChatConversation class for gpt
+    chat_ids = get_ChatId(user, obj)
     conversation = ChatConversation(user, 20, api_key)
-
     chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat)
     if chat_messages.exists():
         conversation.messages = convertChatMessagesToMessages(chat_messages.order_by('created_at'))
     else:
-        first_msg = "Say short hello to user"
-        first_respo = conversation.get_gptResponse(first_msg)
-        first_message = ChatMessage(id_chat=obj, prompt=first_msg, response=first_respo)
-        first_message.save()
+        makeFirstMessage(obj, conversation)
+        
     if request.method == "POST":
         if 'prompt' in request.POST:
             prompt = request.POST["prompt"]
             response = conversation.get_gptFunction(prompt)
             new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response)
             new_msg.save()
-
-            messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
-            messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
-            context = {'messages_': messages_,
-                       'chat_ids': chat_ids,
-                       'chat_category': obj.category,
-                       'chat_categories': chat_categories,
-                       }
-
-            return render(request, 'home.html', context=context)
+            
         elif "new_category" in request.POST:
             category = request.POST["new_category"]
             if not ChatInfo.objects.filter(user=user, category=category).exists():
                 obj = ChatInfo(user=user, category=category)
                 obj.save()
                 new_conversation = ChatConversation(user, 20, api_key)
-                new_msg = "Say short hello to user"
-                new_respo = new_conversation.get_gptResponse(new_msg)
-                new_message = ChatMessage(id_chat=obj, prompt=new_msg, response=new_respo)
-                new_message.save()
+                makeFirstMessage(obj, new_conversation)
             else:
-                obj2 = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
-                obj = obj2
+                obj = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
 
             return redirect('chat', pk=obj.id_chat)
 
-    else:
-        messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
-        messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
-        context = {'messages_': messages_,
-                   'chat_ids': chat_ids,
-                   'chat_category': obj.category,
-                   'chat_categories': chat_categories
-                   }
+    chat_categories.remove(str(obj.category))
+    chat_categories = [str(obj.category)] + chat_categories
+    messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
+    messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
+    context = {'messages_': messages_,
+                'chat_ids': chat_ids,
+                'chat_category': obj.category,
+                'chat_categories': chat_categories
+                }
 
-        return render(request, 'home.html', context=context)
+    return render(request, 'home.html', context=context)
 
 
 @login_required(login_url='signin')
