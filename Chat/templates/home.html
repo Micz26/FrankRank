@@ -19,26 +19,30 @@
         <div class="ui tertiary segment" style="height: calc(100vh - 80px); margin-left: 1vw;">
             <div class = "ui segment" style = "overflow-y: scroll; height: calc(100vh - 110px)">
                 <h3 class="ui header">Category - <div class="item">{{ chat_category }}</div></h3>
+
                     <form method="POST">
                         {% csrf_token %}
-                        <div class="ui action input">
-                            <select name="new_category" class="ui dropdown">
+                        <div class="ui action fluid input">
+                            <select name="new_category" class="ui fluid dropdown">
                                 {% for category in chat_categories %}
                                     <option class = "item" value="{{ category }}">{{ category }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         
-                        <button type="submit" class="ui button" >Change Category</button>
+                        <button type="submit" class="ui fluid button" >Change Category</button>
+                        <div class="ui divider"></div>
                         </form>
+
                         <form method="POST">
                         <div class="ui action input">
                             <button type="button" class="ui button" name="new_chat"><a href="/new_chat/{{chat_category}}">New Chat</a></button>
                         </div>
                         </form>
-                        <div class="ui divider"></div>
+
                         <form method="POST">
                         {% csrf_token %}
+
                             <div class="ui vertical menu">
                                 {% for chat_id_name in chat_ids_names %}
                                     <a class="item" href="/chat/{{chat_id_name.0}}">{{ chat_id_name.1 }}</a>

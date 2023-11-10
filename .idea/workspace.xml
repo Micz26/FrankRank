@@ -2,14 +2,31 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ec71ae9a-2f44-4276-a7e4-5a950fac4fb9" name="Changes" comment="Added function: displayin major holders">
+      <change afterPath="$PROJECT_DIR$/Chat/gpt_functions_desc.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Chat/migrations/0002_auto_20231104_1558.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Chat/migrations/0003_merge_20231109_1434.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Chat/migrations/0003_remove_chatinfo_chat_chatmessage.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Chat/migrations/0004_auto_20231110_1637.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Chat/blob.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/blob.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Chat/gpt.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/gpt.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Chat/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/templates/base.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Chat/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/templates/home.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reuters.ipynb" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />

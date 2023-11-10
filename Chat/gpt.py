@@ -2,52 +2,17 @@ import openai
 import yfinance as yf
 import json
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.offline import plot
+import matplotlib.pyplot as plt
+import seaborn as sns
 from .scrapers import Yahoo
 from .blob import uploadChartToBlobStorage
 import time
+from .gpt_functions_desc import gpt_functions_descriptions
 from itertools import chain
 
 class ChatFunctions:
     def __init__(self):
-        self.functions = [
-            {
-                "name": "get_stock_value",
-                "description": "Get the current value about the given stock",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "chosen_stock": {
-                            "type": "string",
-                            "description": "Stock name e.g. META or MSFT",
-                        },
-                        "unit": {"type": "string",
-                                 "enum": ["USD"]},
-                    },
-                    "required": ["chosen_stock"],
-                },
-            },
-
-            {
-                "name": "interpret_a_chart",
-                "description": "Interpret a list of given stock (1y or 1m or 1d)",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "chosen_stock": {
-                            "type": "string",
-                            "description": "Stock name e.g. META or ACN",
-                        },
-                        "time": {
-                            "type": "string",
-                            "enum": ["1y", "1m", "1d"]},
-                    },
-                    "required": ["chosen_stock", "time"],
-                },
-            }
-        ]
+        self.functions = gpt_functions_descriptions
 
 
 class ChatConversation(ChatFunctions):
@@ -72,6 +37,7 @@ class ChatConversation(ChatFunctions):
         self.messagesJSON = []
         self.urlList = [None]
 
+
     def get_gptResponse(self, message: str) -> list:
         """ Connect with Chatgpt and generates response
 
@@ -85,7 +51,6 @@ class ChatConversation(ChatFunctions):
         self.messages.append(
             {"role": "user", "content": message},
         )
-
         chatgpt = openai.ChatCompletion.create(
             model="gpt-3.5-turbo", messages=self.messages
         )
@@ -108,10 +73,9 @@ class ChatConversation(ChatFunctions):
                 html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
             else:
                 html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
-            if self.htmlChart and i == len(messegesList):
-                html += f'<div class =\"content\"><p>{msg["content"]}<div w3-include-html="{self.htmlChart}"></div></div>'
-                print(self.htmlChart)
-                self.htmlChart = ""
+            if self.htmlChart and i == len(messegesList):                
+                chart = f'<img class="ui centered fluid image" src="{self.htmlChart}">'
+                html += f'<div class =\"content\"><p>{msg["content"]}{chart}</div></div>'
             else:
                 html += f'<div class =\"content\"><p>{msg["content"]}</div></div>'
                 i += 1
@@ -125,19 +89,20 @@ class ChatConversation(ChatFunctions):
 
     def interpret_a_chart(self, stock_name, time):
         stock_data = yf.Ticker(stock_name).history(period=time)
-        fig = px.scatter(x=stock_data.index, y=stock_data["Close"], width=800, height=400)
-        div = fig.to_html(full_html=False)
-        url = uploadChartToBlobStorage(div, self.userName)
+        plt.figure(figsize=(14,5))
+        fig = sns.lineplot(data=stock_data,x="Date",y='Close')
+
+        url = uploadChartToBlobStorage(fig, self.userName)
         stock_data = f"Interpret this list of days close prices {stock_data['Close'].to_list()}. Dont show them to user and talk about trend."
 
         return json.dumps(stock_data), url
 
-    def show_newsPLUSArticles(stock_name="MCD", time=None):
+    def show_newsPLUSArticles(self, stock_name, time=None):
         news_data = yf.Ticker(stock_name).news
         filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
 
         news_info = []
-        for news in filtered_news[-3:]:
+        for news in filtered_news[-1:]:     # displaying more than one news might result in an error
             title = news['title']
             link = news['link']
             scrap = Yahoo(link)
@@ -146,7 +111,32 @@ class ChatConversation(ChatFunctions):
 
         return json.dumps(news_info), None
 
+    def show_news(self, stock_name, time=None):
+        news_data = yf.Ticker(stock_name).news
+        filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
+
+        news_info = []
+        for news in filtered_news[-3:]:
+            title = news['title']
+            link = news['link']
+            news_info.append((title, link))
+
+        return json.dumps(news_info), None
+
+    def display_major_holders(self, stock_name, time):
+        holders_data = yf.Ticker(stock_name).major_holders
+        print(holders_data)
+        df = pd.DataFrame(holders_data)
+
+        df.columns = ['Percentage', 'Description']
+        json_data = df.to_json(orient='records', lines=True)
+        with open('holders_data.json', 'w') as f:
+            f.write(json_data)
+
+        return json.dumps(json_data), None
+
     def get_gptFunction(self, message):
+        url = None
         self.messages.append(
             {"role": "user", "content": message},
         )
@@ -161,11 +151,14 @@ class ChatConversation(ChatFunctions):
         # temp, case we dont want to save function calls
         temp = self.messages.copy()
         response_message = response["choices"][0]["message"]
-
+        
         if response_message.get("function_call"):
             available_functions = {
                 "get_stock_value": self.get_stock_value,
-                "interpret_a_chart": self.interpret_a_chart
+                "interpret_a_chart": self.interpret_a_chart,
+                "show_news": self.show_news,
+                "display_major_holders": self.display_major_holders,
+                "show_newsPLUSArticles": self.show_newsPLUSArticles
             }
 
             function_name = response_message["function_call"]["name"]
@@ -177,9 +170,8 @@ class ChatConversation(ChatFunctions):
                 time=function_args.get("time")
             )
 
-            res, self.htmlChart = function_response
-            self.urlList.append(self.htmlChart)
-
+            res, url = function_response
+            print(url)
             temp.append(response_message)
             temp.append(
                 {
@@ -189,17 +181,16 @@ class ChatConversation(ChatFunctions):
                 }
             )
 
-            second_response = openai.ChatCompletion.create(
+            response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo-0613",
                 messages=temp,
             )
 
-            return second_response["choices"][0]["message"]["content"]
-
-        else:
-            self.messages.append(response["choices"][0]["message"].to_dict())
-
-        return response_message["content"]
+       
+        self.messages.append(response["choices"][0]["message"].to_dict())
+        response_message = response["choices"][0]["message"]
+        
+        return response_message["content"], url
 
     def convertMessegesToJSON(self):
         """ Converts self.messeegs to self.messagesJSON with columns response, prompt, url
@@ -261,8 +252,6 @@ class ChatConversation(ChatFunctions):
                 html += f'<div class =\"content\"><p>{rowAssistant}</div></div>'
                 if image:
                     html += f'<img class="ui fluid image" src={image}>'
-
-
         return html
 
 
@@ -281,9 +270,6 @@ def generate_chat_name(api_key, user_prompt, gpt_response, model="gpt-3.5-turbo"
 
     chat_name = response.choices[0].message.content
     return chat_name
-
-
-
 
 def convertChatMessagesToMessages(chat_messages):
     messages = []
