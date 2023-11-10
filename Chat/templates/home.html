@@ -40,8 +40,8 @@
                         <form method="POST">
                         {% csrf_token %}
                             <div class="ui vertical menu">
-                                {% for chat_id in chat_ids %}
-                                    <a class="item" href="/chat/{{chat_id}}">{{ chat_id }}</a>
+                                {% for chat_id_name in chat_ids_names %}
+                                    <a class="item" href="/chat/{{chat_id_name.0}}">{{ chat_id_name.1 }}</a>
                                 {% endfor %}
                         </form>
                     </div>

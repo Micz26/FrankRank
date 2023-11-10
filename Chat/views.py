@@ -110,8 +110,8 @@ def home(request):
     chat_categories.remove(str(obj.category))
     chat_categories = [str(obj.category)] + chat_categories
 
-    chat_ids_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
-    chat_ids = list(chat_ids_queryset.values_list('name_chat', flat=True))
+    chat_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
+    chat_ids_names = list(chat_queryset.values_list('id_chat', 'name_chat'))
 
     chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat)
     if chat_messages.exists():
@@ -129,7 +129,7 @@ def home(request):
             messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
             messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
             context = {'messages_': messages_,
-                       'chat_ids': chat_ids,
+                       'chat_ids_names ': chat_ids_names,
                        'chat_category': obj.category,
                        'chat_categories': chat_categories,
                        }
@@ -146,7 +146,7 @@ def home(request):
         messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
         messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
         context = {'messages_': messages_,
-                   'chat_ids': chat_ids,
+                   'chat_ids_names': chat_ids_names,
                    'chat_category': obj.category,
                    'chat_categories': chat_categories
                    }
@@ -164,8 +164,8 @@ def new_chat(request, category):
     chat_categories.remove(str(category))
     chat_categories = [str(category)] + chat_categories
 
-    chat_ids_queryset = ChatInfo.objects.filter(user=user, category=category)
-    chat_ids = list(chat_ids_queryset.values_list('name_chat', flat=True))
+    chat_queryset = ChatInfo.objects.filter(user=user, category=category)
+    chat_ids_names = list(chat_queryset.values_list('id_chat', 'name_chat'))
 
     conversation = ChatConversation(user, 20, api_key)
 
@@ -189,7 +189,7 @@ def new_chat(request, category):
     else:
         messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
         context = {'messages_': messages_,
-                   'chat_ids': chat_ids,
+                   'chat_ids_names': chat_ids_names,
                    'chat_category': category,
                    'chat_categories': chat_categories
                    }
@@ -212,8 +212,8 @@ def chat(request, pk):
     chat_categories.remove(str(obj.category))
     chat_categories = [str(obj.category)] + chat_categories
 
-    chat_ids_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
-    chat_ids = list(chat_ids_queryset.values_list('name_chat', flat=True))
+    chat_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
+    chat_ids_names = list(chat_queryset.values_list('id_chat', 'name_chat'))
 
     # declaring ChatConversation class for gpt
     conversation = ChatConversation(user, 20, api_key)
@@ -234,7 +234,7 @@ def chat(request, pk):
             messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
             messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
             context = {'messages_': messages_,
-                       'chat_ids': chat_ids,
+                       'chat_ids_names': chat_ids_names,
                        'chat_category': obj.category,
                        'chat_categories': chat_categories,
                        }
@@ -252,7 +252,7 @@ def chat(request, pk):
         messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
         messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
         context = {'messages_': messages_,
-                   'chat_ids': chat_ids,
+                   'chat_ids_names': chat_ids_names,
                    'chat_category': obj.category,
                    'chat_categories': chat_categories
                    }
