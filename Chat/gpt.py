@@ -125,7 +125,6 @@ class ChatConversation(ChatFunctions):
 
     def display_major_holders(self, stock_name, time):
         holders_data = yf.Ticker(stock_name).major_holders
-        print(holders_data)
         df = pd.DataFrame(holders_data)
 
         df.columns = ['Percentage', 'Description']
@@ -151,7 +150,7 @@ class ChatConversation(ChatFunctions):
         # temp, case we dont want to save function calls
         temp = self.messages.copy()
         response_message = response["choices"][0]["message"]
-        
+
         if response_message.get("function_call"):
             available_functions = {
                 "get_stock_value": self.get_stock_value,
@@ -171,7 +170,7 @@ class ChatConversation(ChatFunctions):
             )
 
             res, url = function_response
-            print(url)
+
             temp.append(response_message)
             temp.append(
                 {
@@ -234,24 +233,37 @@ class ChatConversation(ChatFunctions):
         return self.messeges
 
     def convertMessegesObjToHTML(self, messages_):
-
+        chathistory = []
         html = ""
         html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
-        html += f'<div class =\"content\"><p>Hello Nigger!</div></div>'
+        html += f'<div class =\"content\"><p>Hello {self.userName}!</div></div>'
 
         if messages_ != []:
             result = messages_.values()
             DictList = [entry for entry in result]
-            for row in DictList:
+            for i, row in enumerate(DictList):
                 rowAssistant = row["response"]
                 rowUser = row["prompt"]
                 image = row["image"]
+                
+                Assistant = {"role": "assistant", "content": rowAssistant}
+                User = {"role": "assistant", "content": rowUser}
+                chathistory.append(Assistant)
+                chathistory.append(User)
+                
                 html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
                 html += f'<div class =\"content\"><p>{rowUser}</div></div>'
+                    
                 html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
-                html += f'<div class =\"content\"><p>{rowAssistant}</div></div>'
+                html += f'<div class =\"content\"><p>{rowAssistant}</div>'
                 if image:
-                    html += f'<img class="ui fluid image" src={image}>'
+                    chart = f'<img class="ui centered fluid image" src="{image}"></div>'
+                    html += chart
+                else:
+                    html += '</div>'
+                
+            self.messages = chathistory
+                    
         return html
 
 
@@ -285,8 +297,4 @@ def convertChatMessagesToMessages(chat_messages):
 def convertToFeed(chat_messages):
     messages_ = list(chain(*chat_messages))
     return messages_
-
-
-
-
 
