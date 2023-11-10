@@ -245,45 +245,44 @@ class ChatConversation(ChatFunctions):
     def convertMessegesObjToHTML(self, messages_):
 
         html = ""
-        if messages_ == []:
-            html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
-            html += f'<div class =\"content\"><p>Hello Nigger!</div></div>'
-        else:
+        html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
+        html += f'<div class =\"content\"><p>Hello Nigger!</div></div>'
+
+        if messages_ != []:
             result = messages_.values()
             DictList = [entry for entry in result]
             for row in DictList:
                 rowAssistant = row["response"]
                 rowUser = row["prompt"]
                 image = row["image"]
+                html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
+                html += f'<div class =\"content\"><p>{rowUser}</div></div>'
                 html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
                 html += f'<div class =\"content\"><p>{rowAssistant}</div></div>'
                 if image:
                     html += f'<img class="ui fluid image" src={image}>'
-                html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
-                html += f'<div class =\"content\"><p>{rowUser}</div></div>'
+
 
         return html
 
 
+def generate_chat_name(api_key, user_prompt, gpt_response, model="gpt-3.5-turbo"):
+    openai.api_key = api_key
 
-class ChatNameGenerator:
-    def __init__(self, api_key, model="gpt-3.5-turbo"):
-        openai.api_key = api_key
-        self.model = model
+    prompt = f"Create a chat name for a conversation where the user asks: '{user_prompt}' and the AI responds: '{gpt_response}'"
 
-    def generate_chat_name(self, user_prompt, gpt_response):
-        prompt = f"Create a chat name for a conversation where the user asks: '{user_prompt}' and the AI responds: '{gpt_response}'"
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": "You are ChatGPT name generator, a large language model trained by OpenAI."},
+            {"role": "user", "content": prompt}
+        ]
+    )
 
-        response = openai.ChatCompletion.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": "You are ChatGPT, a large language model trained by OpenAI."},
-                {"role": "user", "content": prompt}
-            ]
-        )
+    chat_name = response.choices[0].message.content
+    return chat_name
 
-        chat_name = response.choices[0].message.content
-        return chat_name
+
 
 
 def convertChatMessagesToMessages(chat_messages):

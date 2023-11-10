@@ -54,6 +54,7 @@ class UserInfo(models.Model):
 class ChatInfo(models.Model):
     id_chat = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.CharField(max_length=100)
+    name_chat = models.TextField(default="New Chat")
     category = models.CharField(max_length=45, default="Personal Finance")
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -70,5 +71,3 @@ class ChatMessage(models.Model):
 
     def save(self, *args, **kwargs):
         super(ChatMessage, self).save(*args, **kwargs)
-
-#name_chat = models.TextField(default="New Chat")

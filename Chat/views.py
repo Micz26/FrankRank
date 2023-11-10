@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 from urllib.parse import quote
 
 
-from .gpt import ChatConversation, convertChatMessagesToMessages
+from .gpt import ChatConversation, convertChatMessagesToMessages, generate_chat_name
 from .models import Profile, ChatInfo, UserInfo, ChatMessage
 import json
 
@@ -46,6 +46,7 @@ def signup(request):
                 new_profile = Profile.objects.create(user=user_model, id_user=user_model.id,
                                                      openai_api_key=openai_api_key)
                 new_profile.save()
+                user = request.user.username
 
                 obj_investments = ChatInfo(user=user, category='Investments')
                 obj_investments.save()
@@ -110,11 +111,14 @@ def home(request):
     chat_categories = [str(obj.category)] + chat_categories
 
     chat_ids_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
-    chat_ids = list(chat_ids_queryset.values_list('id_chat', flat=True))
+    chat_ids = list(chat_ids_queryset.values_list('name_chat', flat=True))
 
     chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat)
     if chat_messages.exists():
-        conversation.messages = convertChatMessagesToMessages(chat_messages.order_by('created_at'))
+        conversation.messages = convertChatMessagesToMessages(chat_messages)
+        if obj.name_chat == 'New Chat':
+            obj.name_chat = generate_chat_name(api_key, chat_messages[0].prompt, chat_messages[0].response)
+            obj.save()
     if request.method == "POST":
         if 'prompt' in request.POST:
             prompt = request.POST["prompt"]
@@ -161,7 +165,7 @@ def new_chat(request, category):
     chat_categories = [str(category)] + chat_categories
 
     chat_ids_queryset = ChatInfo.objects.filter(user=user, category=category)
-    chat_ids = list(chat_ids_queryset.values_list('id_chat', flat=True))
+    chat_ids = list(chat_ids_queryset.values_list('name_chat', flat=True))
 
     conversation = ChatConversation(user, 20, api_key)
 
@@ -209,14 +213,17 @@ def chat(request, pk):
     chat_categories = [str(obj.category)] + chat_categories
 
     chat_ids_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
-    chat_ids = list(chat_ids_queryset.values_list('id_chat', flat=True))
+    chat_ids = list(chat_ids_queryset.values_list('name_chat', flat=True))
 
     # declaring ChatConversation class for gpt
     conversation = ChatConversation(user, 20, api_key)
 
-    chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat)
+    chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
     if chat_messages.exists():
-        conversation.messages = convertChatMessagesToMessages(chat_messages.order_by('created_at'))
+        conversation.messages = convertChatMessagesToMessages(chat_messages)
+        if obj.name_chat == 'New Chat':
+            obj.name_chat = generate_chat_name(api_key, chat_messages[0].prompt, chat_messages[0].response)
+            obj.save()
     if request.method == "POST":
         if 'prompt' in request.POST:
             prompt = request.POST["prompt"]
