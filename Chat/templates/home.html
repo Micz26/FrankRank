@@ -35,11 +35,10 @@
                         </form>
 
                         <form method="POST">
-                        <div class="ui action input">
-                            <button type="button" class="ui button" name="new_chat"><a href="/new_chat/{{chat_category}}">New Chat</a></button>
-                        </div>
+                            <button type="button" class="ui fluid button" name="new_chat">
+                                <a href="/new_chat/{{chat_category}}" style="color: #616161"  >New Chat</a>
+                            </button>
                         </form>
-
                         <form method="POST">
                         {% csrf_token %}
 
