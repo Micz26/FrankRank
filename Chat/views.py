@@ -101,7 +101,7 @@ def makeFirstMessage(obj, conversation):
 
 @login_required(login_url='signin')
 def home(request):
-    api_key = "XX"
+    api_key = "XXX"
     user = request.user.username
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
 
@@ -151,7 +151,7 @@ def home(request):
 def new_chat(request, category):
     messages_ = []
     user = request.user.username
-    api_key = "XX"
+    api_key = "XXX"
 
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
     chat_queryset = ChatInfo.objects.filter(user=user, category=category)
@@ -193,7 +193,7 @@ def new_chat(request, category):
 @login_required(login_url='signin')
 def chat(request, pk):
     obj = ChatInfo.objects.get(id_chat=pk)
-    api_key = "XX"
+    api_key = "XXX"
     user = request.user.username
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
     chat_categories.remove(str(obj.category))

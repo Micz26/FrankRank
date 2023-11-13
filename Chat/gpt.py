@@ -1,4 +1,3 @@
-import openai
 import yfinance as yf
 import json
 import pandas as pd
@@ -9,11 +8,18 @@ from .blob import uploadChartToBlobStorage
 import time
 from .gpt_functions_desc import gpt_functions_descriptions
 from itertools import chain
+from openai import OpenAI
 
 class ChatFunctions:
     def __init__(self):
         self.functions = gpt_functions_descriptions
-
+        self.available_functions = {
+                "get_stock_value": self.get_stock_value,
+                "interpret_a_chart": self.interpret_a_chart,
+                "show_news": self.show_news,
+                "display_major_holders": self.display_major_holders,
+                "show_newsPLUSArticles": self.show_newsPLUSArticles
+            }
 
 class ChatConversation(ChatFunctions):
     """ Class dedicated for controling chat GPT integration
@@ -33,7 +39,7 @@ class ChatConversation(ChatFunctions):
         self.messages = [{"role": "assistant", "content":
             f"You are a conservative financial advisor to user named {self.userName} of age {self.age}. You want to help him maximize investment returns."}]
         self.htmlChart = ""
-        openai.api_key = api_key
+        self.client = OpenAI(api_key = api_key)
         self.messagesJSON = []
         self.urlList = [None]
 
@@ -51,7 +57,7 @@ class ChatConversation(ChatFunctions):
         self.messages.append(
             {"role": "user", "content": message},
         )
-        chatgpt = openai.ChatCompletion.create(
+        chatgpt = self.client.completions.create(
             model="gpt-3.5-turbo", messages=self.messages
         )
         reply = chatgpt.choices[0].message.content
@@ -139,19 +145,53 @@ class ChatConversation(ChatFunctions):
         self.messages.append(
             {"role": "user", "content": message},
         )
-
-        response = openai.ChatCompletion.create(
+        response = self.client.chat.completions.create(
             model="gpt-3.5-turbo-0613",
             messages=self.messages,
-            functions=self.functions,
-            function_call="auto",
+            #tools=self.functions,
+            #tool_choice="auto",
         )
-
+        
         # temp, case we dont want to save function calls
         temp = self.messages.copy()
-        response_message = response["choices"][0]["message"]
+        response_message = response.choices[0].message
+        #https://platform.openai.com/docs/guides/function-calling
+        # ERROR !!! NOT NULL constraint failed: Chat_chatmessage.response
+        tool_calls = response_message.tool_calls
+        if tool_calls:
+            for tool_call in tool_calls:
+                function_name = tool_call.function.name
+                
+                available_functions = {
+                "get_stock_value": self.get_stock_value,
+                "interpret_a_chart": self.interpret_a_chart,
+                "show_news": self.show_news,
+                "display_major_holders": self.display_major_holders,
+                "show_newsPLUSArticles": self.show_newsPLUSArticles
+                }
+                function_to_call = available_functions[function_name]
+                function_args = json.loads(tool_call.function.arguments)
+                function_response = function_to_call(
+                    stock_name=function_args.get("chosen_stock"),
+                    time=function_args.get("time")
+                )
 
-        if response_message.get("function_call"):
+                res, url = function_response
+                print(url)
+                temp.append(response_message)
+                temp.append(
+                    {
+                        "tool_call_id": tool_call.id,
+                        "role": "tool",
+                        "name": function_name,
+                        "content": res,
+                    })
+                
+                response = self.client.chat.completions.create(
+                    model="gpt-3.5-turbo-1106",
+                    messages=self.messages)
+                print(response)
+            '''
             available_functions = {
                 "get_stock_value": self.get_stock_value,
                 "interpret_a_chart": self.interpret_a_chart,
@@ -170,7 +210,7 @@ class ChatConversation(ChatFunctions):
             )
 
             res, url = function_response
-
+            print(url)
             temp.append(response_message)
             temp.append(
                 {
@@ -180,16 +220,18 @@ class ChatConversation(ChatFunctions):
                 }
             )
 
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo-0613",
                 messages=temp,
             )
+            '''
 
-       
-        self.messages.append(response["choices"][0]["message"].to_dict())
-        response_message = response["choices"][0]["message"]
+               
         
-        return response_message["content"], url
+        self.messages.append(response.choices[0].message)
+        #response_message = response.choices[0].message.content
+        print(self.messages)
+        return str(response.choices[0].message.content), url
 
     def convertMessegesToJSON(self):
         """ Converts self.messeegs to self.messagesJSON with columns response, prompt, url
@@ -268,11 +310,13 @@ class ChatConversation(ChatFunctions):
 
 
 def generate_chat_name(api_key, user_prompt, gpt_response, model="gpt-3.5-turbo"):
-    openai.api_key = api_key
+    client = OpenAI(
+        api_key = api_key,
+    )
 
     prompt = f"Create a chat name for a conversation where the user asks: '{user_prompt}' and the AI responds: '{gpt_response}'"
 
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model=model,
         messages=[
             {"role": "system", "content": "You are ChatGPT name generator, a large language model trained by OpenAI."},
