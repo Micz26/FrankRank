@@ -101,7 +101,7 @@ def makeFirstMessage(obj, conversation):
 
 @login_required(login_url='signin')
 def home(request):
-    api_key = "XXX"
+    api_key = "XX"
     user = request.user.username
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
 
@@ -151,12 +151,9 @@ def home(request):
 def new_chat(request, category):
     messages_ = []
     user = request.user.username
-    api_key = "XXX"
+    api_key = "XX"
 
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
-    chat_categories.remove(str(category))
-    chat_categories = [str(category)] + chat_categories
-
     chat_queryset = ChatInfo.objects.filter(user=user, category=category)
     chat_ids_names = list(chat_queryset.values_list('id_chat', 'name_chat'))
 
@@ -179,7 +176,9 @@ def new_chat(request, category):
         
         elif "new_chat" in request.POST:
             return redirect('new_chat', category=category)
-
+    
+    chat_categories.remove(str(category))
+    chat_categories = [str(category)] + chat_categories
     messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
     context = {'messages_': messages_,
                 'chat_ids_names': chat_ids_names,
@@ -194,7 +193,7 @@ def new_chat(request, category):
 @login_required(login_url='signin')
 def chat(request, pk):
     obj = ChatInfo.objects.get(id_chat=pk)
-    api_key = "XXX"
+    api_key = "XX"
     user = request.user.username
     chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
     chat_categories.remove(str(obj.category))
@@ -222,8 +221,8 @@ def chat(request, pk):
         elif "new_category" in request.POST:
             category = request.POST["new_category"]
             obj = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
-
             return redirect('chat', pk=obj.id_chat)
+        
         elif "new_chat" in request.POST:
             return redirect('new_chat', category=obj.category)
 
