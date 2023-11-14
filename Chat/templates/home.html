@@ -54,14 +54,14 @@
 
     <div class="eleven wide column" >
         <div class = "ui segment" >
-            <div id = "scroll" style="overflow-y: scroll; max-height: calc(100vh - 75px - 80px)">
+            <div id = "scrollMesseges" style="overflow-y: scroll; max-height: calc(100vh - 75px - 80px)">
                 {% for message in messages_ %}
                     <div class="alert alert-danger" role="alert">
                         {{ message }}
                     </div>
                 {% endfor %}
                 <script>
-                    var objDiv = document.getElementById("scroll");
+                    var objDiv = document.getElementById("scrollMesseges");
                     objDiv.scrollTop = objDiv.scrollHeight;
                 </script>
             </div>

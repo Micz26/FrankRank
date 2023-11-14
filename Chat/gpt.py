@@ -9,6 +9,7 @@ import time
 from .gpt_functions_desc import gpt_functions_descriptions
 from itertools import chain
 from openai import OpenAI
+import numpy as np
 
 class ChatFunctions:
     def __init__(self):
@@ -99,7 +100,8 @@ class ChatConversation(ChatFunctions):
         fig = sns.lineplot(data=stock_data,x="Date",y='Close')
 
         url = uploadChartToBlobStorage(fig, self.userName)
-        stock_data = f"Interpret this list of days close prices {stock_data['Close'].to_list()}. Dont show them to user and talk about trend."
+        prices = list(np.around(np.array(stock_data['Close'].to_list()),2))
+        stock_data = f"Interpret this list of days close prices {prices}. Dont show them to user and talk about trend."
 
         return json.dumps(stock_data), url
 
@@ -146,17 +148,14 @@ class ChatConversation(ChatFunctions):
             {"role": "user", "content": message},
         )
         response = self.client.chat.completions.create(
-            model="gpt-3.5-turbo-0613",
+            model="gpt-3.5-turbo-1106",
             messages=self.messages,
-            #tools=self.functions,
-            #tool_choice="auto",
+            tools=self.functions,
+            tool_choice="auto",
         )
         
-        # temp, case we dont want to save function calls
         temp = self.messages.copy()
         response_message = response.choices[0].message
-        #https://platform.openai.com/docs/guides/function-calling
-        # ERROR !!! NOT NULL constraint failed: Chat_chatmessage.response
         tool_calls = response_message.tool_calls
         if tool_calls:
             for tool_call in tool_calls:
@@ -177,7 +176,6 @@ class ChatConversation(ChatFunctions):
                 )
 
                 res, url = function_response
-                print(url)
                 temp.append(response_message)
                 temp.append(
                     {
@@ -189,48 +187,14 @@ class ChatConversation(ChatFunctions):
                 
                 response = self.client.chat.completions.create(
                     model="gpt-3.5-turbo-1106",
-                    messages=self.messages)
-                print(response)
-            '''
-            available_functions = {
-                "get_stock_value": self.get_stock_value,
-                "interpret_a_chart": self.interpret_a_chart,
-                "show_news": self.show_news,
-                "display_major_holders": self.display_major_holders,
-                "show_newsPLUSArticles": self.show_newsPLUSArticles
-            }
-
-            function_name = response_message["function_call"]["name"]
-            function_to_call = available_functions[function_name]
-            function_args = json.loads(response_message["function_call"]["arguments"])
-
-            function_response = function_to_call(
-                stock_name=function_args.get("chosen_stock"),
-                time=function_args.get("time")
-            )
-
-            res, url = function_response
-            print(url)
-            temp.append(response_message)
-            temp.append(
-                {
-                    "role": "function",
-                    "name": function_name,
-                    "content": res,
-                }
-            )
-
-            response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo-0613",
-                messages=temp,
-            )
-            '''
+                    messages=temp)
+                
+                break
+            
 
                
         
         self.messages.append(response.choices[0].message)
-        #response_message = response.choices[0].message.content
-        print(self.messages)
         return str(response.choices[0].message.content), url
 
     def convertMessegesToJSON(self):
