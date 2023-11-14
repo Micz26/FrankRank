@@ -176,8 +176,8 @@ class ChatConversation(ChatFunctions):
                 )
 
                 res, url = function_response
-                temp.append(response_message)
-                temp.append(
+                self.messages.append(response_message)
+                self.messages.append(
                     {
                         "tool_call_id": tool_call.id,
                         "role": "tool",
@@ -187,12 +187,9 @@ class ChatConversation(ChatFunctions):
                 
                 response = self.client.chat.completions.create(
                     model="gpt-3.5-turbo-1106",
-                    messages=temp)
+                    messages=self.messages)
                 
                 break
-            
-
-               
         
         self.messages.append(response.choices[0].message)
         return str(response.choices[0].message.content), url
