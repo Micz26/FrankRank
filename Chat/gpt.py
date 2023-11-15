@@ -10,6 +10,8 @@ from .gpt_functions_desc import gpt_functions_descriptions
 from itertools import chain
 from openai import OpenAI
 import numpy as np
+from wordcloud import WordCloud
+import squarify
 
 class ChatFunctions:
     def __init__(self):
@@ -105,10 +107,24 @@ class ChatConversation(ChatFunctions):
 
         return json.dumps(stock_data), url
 
+    def makeWordCloud(self, text:str):
+        """ Makes and uploades to blob wordcloud 
+            Returns : 
+                url : blob storage url of figure
+        """
+        wordcloud = WordCloud(max_font_size=40).generate(text)
+        fig = plt.figure(figsize=(10, 4), dpi=100) 
+        plt.imshow(wordcloud, interpolation="nearest", aspect="auto")
+        plt.tight_layout(pad = 0)
+        plt.axis("off")
+        url = uploadChartToBlobStorage(fig, self.userName)
+        return url
+
     def show_newsPLUSArticles(self, stock_name, time=None):
         news_data = yf.Ticker(stock_name).news
         filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
 
+        cloud = ""
         news_info = []
         for news in filtered_news[-1:]:     # displaying more than one news might result in an error
             title = news['title']
@@ -116,8 +132,10 @@ class ChatConversation(ChatFunctions):
             scrap = Yahoo(link)
             article = scrap.get_soupTextYahoo()
             news_info.append((title, link, article))
-
-        return json.dumps(news_info), None
+            cloud += article
+        
+        url = self.makeWordCloud(cloud)
+        return json.dumps(news_info), url
 
     def show_news(self, stock_name, time=None):
         news_data = yf.Ticker(stock_name).news
@@ -131,16 +149,34 @@ class ChatConversation(ChatFunctions):
 
         return json.dumps(news_info), None
 
+
     def display_major_holders(self, stock_name, time):
-        holders_data = yf.Ticker(stock_name).major_holders
-        df = pd.DataFrame(holders_data)
-
-        df.columns = ['Percentage', 'Description']
-        json_data = df.to_json(orient='records', lines=True)
-        with open('holders_data.json', 'w') as f:
-            f.write(json_data)
-
-        return json.dumps(json_data), None
+        ticker = yf.Ticker(stock_name)
+        institutional_holders = ticker.institutional_holders
+        mutualfund_holders = ticker.mutualfund_holders
+        df = pd.DataFrame(institutional_holders)
+        df2 = pd.DataFrame(mutualfund_holders)
+        df = pd.concat([df, df2])
+        df = df[["Holder", "% Out"]]
+        majorSum = int(df['% Out'].sum())
+        other = pd.DataFrame([{"Holder" : "Other holders", "% Out": 1 - majorSum}])
+        df = pd.concat([df, other])
+        
+        sizes = df["% Out"].astype(float)
+        labels = df['Holder'].str.split().str[0] + ".."
+        fig1, ax1 = plt.subplots(figsize=(8, 5))
+        fig1.subplots_adjust(0.3, 0, 1, 1)
+        theme = plt.get_cmap('gist_ncar')
+        ax1.set_prop_cycle("color", [theme(1. * i / len(sizes)) for i in range(len(sizes))])
+        _, _ = ax1.pie(sizes, startangle=90, radius=1800)
+        ax1.axis('equal')
+        total = sum(sizes)
+        plt.legend(loc='upper left', labels=['%s, %1.1f%%' % (l, (float(s) / total) * 100) for l, s in zip(labels, sizes)],
+            prop={'size': 11}, bbox_to_anchor=(0.0, 1), bbox_transform=fig1.transFigure)
+        
+        url = uploadChartToBlobStorage(fig1, self.userName)
+        json_list = json.loads(json.dumps(list(df.T.to_dict().values())))  
+        return json.dumps(json_list), url
 
     def get_gptFunction(self, message):
         url = None
@@ -176,8 +212,8 @@ class ChatConversation(ChatFunctions):
                 )
 
                 res, url = function_response
-                self.messages.append(response_message)
-                self.messages.append(
+                temp.append(response_message)
+                temp.append(
                     {
                         "tool_call_id": tool_call.id,
                         "role": "tool",
@@ -187,7 +223,7 @@ class ChatConversation(ChatFunctions):
                 
                 response = self.client.chat.completions.create(
                     model="gpt-3.5-turbo-1106",
-                    messages=self.messages)
+                    messages=temp)
                 
                 break
         
@@ -260,7 +296,7 @@ class ChatConversation(ChatFunctions):
                 html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
                 html += f'<div class =\"content\"><p>{rowAssistant}</div>'
                 if image:
-                    chart = f'<img class="ui centered fluid image" src="{image}"></div>'
+                    chart = f'<img class="ui centered image" src="{image}"></div>'
                     html += chart
                 else:
                     html += '</div>'
