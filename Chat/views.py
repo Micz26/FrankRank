@@ -114,6 +114,7 @@ def get_context(messages_, chat_ids_names, category, chat_categories):
 
 def make_chatName(obj, conversation, prompt, response):
     obj.name_chat = conversation.generate_chat_name(prompt, response)
+    #obj.response = conversation.messages[0]["content"]
     obj.save()
 
 def make_validMessage(conversation, obj, prompt, chat_ids_names, chat_categories):
@@ -182,6 +183,7 @@ def new_chat(request, category):
     if request.method == "POST":
         if 'prompt' in request.POST:
             obj = ChatInfo(user=user, category=category)
+            obj.save()
             prompt = request.POST["prompt"]
             context = make_validMessage(conversation, obj, prompt, chat_ids_names, chat_categories)
             if context:

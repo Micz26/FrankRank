@@ -204,11 +204,11 @@ class ChatConversation(ChatFunctions):
                 )
 
                 res, url = function_response
-                self.messages.append(response_message)
+                #self.messages.append(response_message)
                 self.messages.append(
                     {
                         "tool_call_id": tool_call.id,
-                        "role": "tool",
+                        "role": "function",
                         "name": function_name,
                         "content": res,
                     })
@@ -307,6 +307,7 @@ class ChatConversation(ChatFunctions):
         """ Takes chat messages form database and converts it to OpenAI object,
             must be declared before promt
         """
+        self.messages = []
         for chat_message in chat_messages:
             rowAssistant = {"role": "assistant", "content": chat_message.response}
             rowUser = {"role": "user", "content": chat_message.prompt}
