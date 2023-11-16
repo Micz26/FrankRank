@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 from urllib.parse import quote
 import openai
 
-from .gpt import ChatConversation, convertChatMessagesToMessages, generate_chat_name
+from .gpt import ChatConversation
 from .models import Profile, ChatInfo, UserInfo, ChatMessage
 import json
 
@@ -112,7 +112,11 @@ def get_context(messages_, chat_ids_names, category, chat_categories):
             }
     return context
 
-def make_validMassage(conversation, obj, prompt, chat_ids_names, chat_categories):
+def make_chatName(obj, conversation, prompt, response):
+    obj.name_chat = conversation.generate_chat_name(prompt, response)
+    obj.save()
+
+def make_validMessage(conversation, obj, prompt, chat_ids_names, chat_categories):
     """ Checks if openAI key is valid, if so makes new message, if not return new context 
         with warning message.
         
@@ -140,15 +144,14 @@ def home(request):
     chat_categories = get_ChatCategories(obj.category)
     chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat)
     if chat_messages.exists():
-        conversation.messages = convertChatMessagesToMessages(chat_messages)
+        conversation.convertChatMessagesToMessages(chat_messages)
         if obj.name_chat == 'New Chat':
-            obj.name_chat = generate_chat_name(api_key, chat_messages[0].prompt, chat_messages[0].response)
-            obj.save()
+            make_chatName(obj, conversation, chat_messages[0].prompt, chat_messages[0].response)
 
     if request.method == "POST":
         if 'prompt' in request.POST:
             prompt = request.POST["prompt"]
-            context = make_validMassage(conversation, obj, prompt, chat_ids_names, chat_categories)
+            context = make_validMessage(conversation, obj, prompt, chat_ids_names, chat_categories)
             if context:
                 return render(request, 'home.html', context=context)
             return redirect('chat', pk=obj.id_chat)
@@ -179,9 +182,8 @@ def new_chat(request, category):
     if request.method == "POST":
         if 'prompt' in request.POST:
             obj = ChatInfo(user=user, category=category)
-            obj.save()
             prompt = request.POST["prompt"]
-            context = make_validMassage(conversation, obj, prompt, chat_ids_names, chat_categories)
+            context = make_validMessage(conversation, obj, prompt, chat_ids_names, chat_categories)
             if context:
                 return render(request, 'home.html', context=context)
             return redirect('chat', pk=obj.id_chat)
@@ -213,16 +215,15 @@ def chat(request, pk):
     chat_categories = get_ChatCategories(obj.category)
     
     if chat_messages.exists():
-        conversation.messages = convertChatMessagesToMessages(chat_messages)
+        conversation.convertChatMessagesToMessages(chat_messages)
         if obj.name_chat == 'New Chat':
-            obj.name_chat = generate_chat_name(api_key, chat_messages[0].prompt, chat_messages[0].response)
-            obj.save()
+            make_chatName(obj, conversation, chat_messages[0].prompt, chat_messages[0].response)
             return redirect('chat', pk=obj.id_chat)
         
     if request.method == "POST":
         if 'prompt' in request.POST:
             prompt = request.POST["prompt"]
-            context = make_validMassage(conversation, obj, prompt, chat_ids_names, chat_categories)
+            context = make_validMessage(conversation, obj, prompt, chat_ids_names, chat_categories)
             if context:
                 return render(request, 'home.html', context=context)
             return redirect('chat', pk=obj.id_chat)
