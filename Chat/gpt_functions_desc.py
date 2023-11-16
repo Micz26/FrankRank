@@ -42,24 +42,6 @@ gpt_functions_descriptions = [
             {
                 "type": "function",
                 "function": {
-                    "name": "show_news",
-                    "description": "show brief or fast or quick (it have to be clearly stated) news about given stock",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "chosen_stock": {
-                                "type": "string",
-                                "description": "Stock name e.g. META or ACN",
-                            },
-                        },
-                        "required": ["chosen_stock"],
-                    },
-                }
-            },
-
-            {
-                "type": "function",
-                "function": {
                     "name": "display_major_holders",
                     "description": "display major holders of given stock",
                     "parameters": {

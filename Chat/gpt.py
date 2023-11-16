@@ -11,74 +11,78 @@ from openai import OpenAI
 import numpy as np
 from wordcloud import WordCloud
 
+
 class ChatFunctions:
     def __init__(self):
         self.functions = gpt_functions_descriptions
         self.available_functions = {
-                "get_stock_value": self.get_stock_value,
-                "interpret_a_chart": self.interpret_a_chart,
-                "show_news": self.show_news,
-                "display_major_holders": self.display_major_holders,
-                "show_newsPLUSArticles": self.show_newsPLUSArticles
-            }
-    
-    def get_stock_value(self, stock_name, time=None):
+            "get_stock_value": self.get_stock_value,
+            "interpret_a_chart": self.interpret_a_chart,
+            "display_major_holders": self.display_major_holders,
+            "show_newsPLUSArticles": self.show_newsPLUSArticles
+        }
+
+    def get_stock_value(self, stock_name, time=None, api_key=None):
         stock_data = yf.Ticker(stock_name).history(period="1d")["Close"][0]
 
         return json.dumps(stock_data), None
 
-    def interpret_a_chart(self, stock_name, time):
+    def interpret_a_chart(self, stock_name, time, api_key=None):
         stock_data = yf.Ticker(stock_name).history(period=time)
-        plt.figure(figsize=(14,5))
-        fig = sns.lineplot(data=stock_data,x="Date",y='Close')
+        plt.figure(figsize=(14, 5))
+        fig = sns.lineplot(data=stock_data, x="Date", y='Close')
 
         url = uploadChartToBlobStorage(fig, self.userName)
-        prices = list(np.around(np.array(stock_data['Close'].to_list()),2))
+        prices = list(np.around(np.array(stock_data['Close'].to_list()), 2))
         stock_data = f"Interpret this list of days close prices {prices}. Dont show them to user and talk about trend."
 
         return json.dumps(stock_data), url
 
-    def makeWordCloud(self, text:str):
+    def makeWordCloud(self, text: str, api_key=None):
         """ Makes and uploades to blob wordcloud 
             Returns : 
                 url : blob storage url of figure
         """
         wordcloud = WordCloud(width=1600, height=800).generate(text)
-        fig = plt.figure(figsize=(14, 5)) 
+        fig = plt.figure(figsize=(14, 5))
         plt.imshow(wordcloud, interpolation="nearest", aspect="auto")
-        plt.tight_layout(pad = 0)
+        plt.tight_layout(pad=0)
         plt.axis("off")
         url = uploadChartToBlobStorage(fig, self.userName)
         return url
 
-    def show_newsPLUSArticles(self, stock_name, time=None):
+    def show_newsPLUSArticles(self, stock_name, time=None, api_key=None):
         news_data = yf.Ticker(stock_name).news
         filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
 
         cloud = ""
         news_info = []
-        for news in filtered_news[-1:]:     # displaying more than one news might result in an error
+
+        for news in filtered_news[-1:]:  # displaying more than one news might result in an error
             title = news['title']
             link = news['link']
             scrap = Yahoo(link)
-            article = scrap.get_soupTextYahoo()
-            news_info.append((title, link, article))
-            cloud += article
-        
+            article_data = scrap.get_soupTextYahoo()
+
+            client = OpenAI(api_key=api_key)
+            prompt = f"Create at least 4 bullet points sentences for this article: '{article_data}'. " \
+                     f"IMPORTANT: Keep important informations unchanged!"
+            response_bp = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are ChatGPT bullet points writer, who is consistent and smart"},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            bullet_points = response_bp.choices[0].message.content
+
+            cloud += bullet_points
+            news_info.append((title, link, bullet_points))
+
+        if cloud == "":
+            cloud = "Sorry"
         url = self.makeWordCloud(cloud)
         return json.dumps(news_info), url
-
-    def show_news(self, stock_name, time=None):
-        news_data = yf.Ticker(stock_name).news
-        filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
-
-        news_info = []
-        for news in filtered_news[-3:]:
-            title = news['title']
-            link = news['link']
-            news_info.append((title, link))
-
-        return json.dumps(news_info), None
 
     def makeHoldersPieChart(self, sizes, labels):
         fig1, ax1 = plt.subplots(figsize=(14, 5))
@@ -88,12 +92,13 @@ class ChatFunctions:
         _, _ = ax1.pie(sizes, startangle=90, radius=1800)
         ax1.axis('equal')
         total = sum(sizes)
-        plt.legend(loc='upper left', labels=['%s, %1.1f%%' % (l, (float(s) / total) * 100) for l, s in zip(labels, sizes)],
+        plt.legend(loc='upper left',
+                   labels=['%s, %1.1f%%' % (l, (float(s) / total) * 100) for l, s in zip(labels, sizes)],
                    prop={'size': 11}, bbox_to_anchor=(0.0, 1), bbox_transform=fig1.transFigure)
-        
+
         return fig1
 
-    def display_major_holders(self, stock_name, time):
+    def display_major_holders(self, stock_name, time, api_key=None):
         ticker = yf.Ticker(stock_name)
         institutional_holders = ticker.institutional_holders
         mutualfund_holders = ticker.mutualfund_holders
@@ -102,13 +107,14 @@ class ChatFunctions:
         df = pd.concat([df, df2])
         df = df[["Holder", "% Out"]]
         majorSum = int(df['% Out'].sum())
-        other = pd.DataFrame([{"Holder" : "Other holders", "% Out": 1 - majorSum}])
+        other = pd.DataFrame([{"Holder": "Other holders", "% Out": 1 - majorSum}])
         df = pd.concat([df, other])
-        
+
         fig = self.makeHoldersPieChart(sizes=df["% Out"].astype(float), labels=df['Holder'])
         url = uploadChartToBlobStorage(fig, self.userName)
-        json_list = json.loads(json.dumps(list(df.T.to_dict().values())))  
+        json_list = json.loads(json.dumps(list(df.T.to_dict().values())))
         return json.dumps(json_list), url
+
 
 class ChatConversation(ChatFunctions):
     """ Class dedicated for controling chat GPT integration
@@ -128,10 +134,11 @@ class ChatConversation(ChatFunctions):
         self.messages = [{"role": "assistant", "content":
             f"You are a conservative financial advisor to user named {self.userName} of age {self.age}. You want to help him maximize investment returns."}]
         self.htmlChart = ""
-        self.client = OpenAI(api_key = api_key)
+        self.client = OpenAI(api_key=api_key)
         self.messagesJSON = []
+        self.urlList = [None] # might result in an error; TBR in case of an error
+        self.api_key = api_key
         self.model = "gpt-3.5-turbo-1106"
-        
 
 
     def get_gptResponse(self, message: str) -> list:
@@ -169,7 +176,7 @@ class ChatConversation(ChatFunctions):
                 html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
             else:
                 html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
-            if self.htmlChart and i == len(messegesList):                
+            if self.htmlChart and i == len(messegesList):
                 chart = f'<img class="ui centered fluid image" src="{self.htmlChart}">'
                 html += f'<div class =\"content\"><p>{msg["content"]}{chart}</div></div>'
             else:
@@ -177,7 +184,6 @@ class ChatConversation(ChatFunctions):
                 i += 1
 
         return html
-
 
     def get_gptFunction(self, message):
         url = None
@@ -190,7 +196,7 @@ class ChatConversation(ChatFunctions):
             tools=self.functions,
             tool_choice="auto",
         )
-        
+
         response_message = response.choices[0].message
         tool_calls = response_message.tool_calls
         if tool_calls:
@@ -198,9 +204,11 @@ class ChatConversation(ChatFunctions):
                 function_name = tool_call.function.name
                 function_to_call = self.available_functions[function_name]
                 function_args = json.loads(tool_call.function.arguments)
+                function_args["api_key"] = self.api_key
                 function_response = function_to_call(
                     stock_name=function_args.get("chosen_stock"),
-                    time=function_args.get("time")
+                    time=function_args.get("time"),
+                    api_key=function_args.get("api_key")
                 )
 
                 res, url = function_response
@@ -212,13 +220,13 @@ class ChatConversation(ChatFunctions):
                         "name": function_name,
                         "content": res,
                     })
-                
+
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=self.messages)
-                
+
                 break
-        
+
         self.messages.append(response.choices[0].message)
         return str(response.choices[0].message.content), url
 
@@ -274,10 +282,10 @@ class ChatConversation(ChatFunctions):
                 rowAssistant = row["response"]
                 rowUser = row["prompt"]
                 image = row["image"]
-                
+ 
                 html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
                 html += f'<div class =\"content\"><p>{rowUser}</div></div>'
-                    
+
                 html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
                 html += f'<div class =\"content\"><p>{rowAssistant}</div>'
                 if image:
@@ -313,5 +321,3 @@ class ChatConversation(ChatFunctions):
             rowUser = {"role": "user", "content": chat_message.prompt}
             self.messages.append(rowAssistant)
             self.messages.append(rowUser)
-
-
