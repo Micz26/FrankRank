@@ -190,7 +190,6 @@ class ChatConversation(ChatFunctions):
             tool_choice="auto",
         )
         
-        temp = self.messages.copy()
         response_message = response.choices[0].message
         tool_calls = response_message.tool_calls
         if tool_calls:
@@ -204,8 +203,8 @@ class ChatConversation(ChatFunctions):
                 )
 
                 res, url = function_response
-                temp.append(response_message)
-                temp.append(
+                self.messages.append(response_message)
+                self.messages.append(
                     {
                         "tool_call_id": tool_call.id,
                         "role": "tool",
@@ -215,7 +214,7 @@ class ChatConversation(ChatFunctions):
                 
                 response = self.client.chat.completions.create(
                     model="gpt-3.5-turbo-1106",
-                    messages=temp)
+                    messages=self.messages)
                 
                 break
         
@@ -252,15 +251,15 @@ class ChatConversation(ChatFunctions):
         if not self.messagesJSON:
             self.convertMessegesToJSON()
 
-        self.messeges = []
+        self.messages = []
         for item in self.messagesJSON:
             rowAssistant = {"role": "assistant", "content": item["response"]}
             rowUser = {"role": "assistant", "content": item["prompt"]}
 
-            self.messeges.append(rowAssistant)
-            self.messeges.append(rowUser)
+            self.messages.append(rowAssistant)
+            self.messages.append(rowUser)
 
-        return self.messeges
+        return self.messages
 
     def convertMessegesObjToHTML(self, messages_):
         chathistory = []

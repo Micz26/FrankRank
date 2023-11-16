@@ -121,7 +121,8 @@ def home(request):
             response, image = conversation.get_gptFunction(prompt)
             new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response, image = image)
             new_msg.save()
-            
+            return redirect('chat', pk=obj.id_chat)
+        
         elif "new_category" in request.POST:
             category = request.POST["new_category"]
             obj = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
