@@ -7,18 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.utils.safestring import mark_safe
 from urllib.parse import quote
 
-
 from .gpt import ChatConversation, convertChatMessagesToMessages, generate_chat_name
 from .models import Profile, ChatInfo, UserInfo, ChatMessage
 import json
 
 
 def signup(request):
-    # TODO: Create HTML template and backend for User model, with openai validation
-    # TODO: Create template and backend for changing data in model
-    # TODO: Veryfi user email
-    # TODO: Sigup with google, github
-
     if request.method == "POST":
         username = request.POST['username']
         email = request.POST['email']
@@ -67,7 +61,6 @@ def signup(request):
 
 
 def signin(request):
-    # TODO: Sign in with github, google
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
@@ -88,10 +81,10 @@ def logout(request):
     auth.logout(request)
     return redirect('signin')
 
-def get_ChatId(user, obj):
-    chat_ids_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
-    chat_ids = list(chat_ids_queryset.values_list('id_chat', flat=True))
-    return chat_ids
+def get_chat_ids_names(user, category):
+    chat_queryset = ChatInfo.objects.filter(user=user, category=category)
+    chat_ids_names = list(chat_queryset.values_list('id_chat', 'name_chat'))
+    return chat_ids_names
 
 def makeFirstMessage(obj, conversation):
     first_msg = "Say short hello to user"
@@ -99,18 +92,21 @@ def makeFirstMessage(obj, conversation):
     first_message = ChatMessage(id_chat=obj, prompt=first_msg, response=first_respo)
     first_message.save()
 
+def get_ChatCategories(category, chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']):
+    chat_categories = chat_categories.copy()
+    chat_categories.remove(str(category))
+    chat_categories = [str(category)] + chat_categories
+    return chat_categories
+    
 @login_required(login_url='signin')
 def home(request):
     api_key = "XXX"
     user = request.user.username
-    chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
-
     # declaring ChatConversation class for gpt
     conversation = ChatConversation(user, 20, api_key)
 
     obj = ChatInfo.objects.filter(user=user).order_by('-created_at').latest('created_at')
-    chat_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
-    chat_ids_names = list(chat_queryset.values_list('id_chat', 'name_chat'))
+    chat_ids_names = get_chat_ids_names(user, obj.category)
 
     chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat)
     if chat_messages.exists():
@@ -134,8 +130,7 @@ def home(request):
         elif "new_chat" in request.POST:
             return redirect('new_chat', category=obj.category)
    
-    chat_categories.remove(str(obj.category))
-    chat_categories = [str(obj.category)] + chat_categories
+    chat_categories = get_ChatCategories(obj.category)
     messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
     messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
     context = {'messages_': messages_,
@@ -153,7 +148,6 @@ def new_chat(request, category):
     user = request.user.username
     api_key = "XXX"
 
-    chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
     chat_queryset = ChatInfo.objects.filter(user=user, category=category)
     chat_ids_names = list(chat_queryset.values_list('id_chat', 'name_chat'))
 
@@ -177,8 +171,7 @@ def new_chat(request, category):
         elif "new_chat" in request.POST:
             return redirect('new_chat', category=category)
     
-    chat_categories.remove(str(category))
-    chat_categories = [str(category)] + chat_categories
+    chat_categories = get_ChatCategories(category)
     messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
     context = {'messages_': messages_,
                 'chat_ids_names': chat_ids_names,
@@ -195,17 +188,11 @@ def chat(request, pk):
     obj = ChatInfo.objects.get(id_chat=pk)
     api_key = "XXX"
     user = request.user.username
-    chat_categories = ['Personal Finance', 'Investments', 'Insurance', 'Car Insurance']
-    chat_categories.remove(str(obj.category))
-    chat_categories = [str(obj.category)] + chat_categories
 
-    chat_queryset = ChatInfo.objects.filter(user=user, category=obj.category)
-    chat_ids_names = list(chat_queryset.values_list('id_chat', 'name_chat'))
-
-    # declaring ChatConversation class for gpt
+    chat_ids_names = get_chat_ids_names(user, obj.category)
     conversation = ChatConversation(user, 20, api_key)
-
     chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
+    
     if chat_messages.exists():
         conversation.messages = convertChatMessagesToMessages(chat_messages)
         if obj.name_chat == 'New Chat':
@@ -225,7 +212,8 @@ def chat(request, pk):
         
         elif "new_chat" in request.POST:
             return redirect('new_chat', category=obj.category)
-
+    
+    chat_categories = get_ChatCategories(obj.category)
     messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
     messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
     context = {'messages_': messages_,
