@@ -147,10 +147,7 @@ def new_chat(request, category):
     messages_ = []
     user = request.user.username
     api_key = "XXX"
-
-    chat_queryset = ChatInfo.objects.filter(user=user, category=category)
-    chat_ids_names = list(chat_queryset.values_list('id_chat', 'name_chat'))
-
+    chat_ids_names = get_chat_ids_names(user, category)
     conversation = ChatConversation(user, 20, api_key)
 
     if request.method == "POST":
@@ -198,6 +195,8 @@ def chat(request, pk):
         if obj.name_chat == 'New Chat':
             obj.name_chat = generate_chat_name(api_key, chat_messages[0].prompt, chat_messages[0].response)
             obj.save()
+            return redirect('chat', pk=obj.id_chat)
+        
     if request.method == "POST":
         if 'prompt' in request.POST:
             prompt = request.POST["prompt"]
