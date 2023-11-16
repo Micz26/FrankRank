@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.decorators import login_required
 from django.utils.safestring import mark_safe
 from urllib.parse import quote
+import openai
 
 from .gpt import ChatConversation, convertChatMessagesToMessages, generate_chat_name
 from .models import Profile, ChatInfo, UserInfo, ChatMessage
@@ -97,6 +98,35 @@ def get_ChatCategories(category, chat_categories = ['Personal Finance', 'Investm
     chat_categories.remove(str(category))
     chat_categories = [str(category)] + chat_categories
     return chat_categories
+
+def make_newMessage(conversation, obj, prompt):
+    response, image = conversation.get_gptFunction(prompt)
+    new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response, image = image)
+    new_msg.save()
+    
+def get_context(messages_, chat_ids_names, category, chat_categories):
+    context = {'messages_': messages_,
+            'chat_ids_names': chat_ids_names,
+            'chat_category': category,
+            'chat_categories': chat_categories
+            }
+    return context
+
+def make_validMassage(conversation, obj, prompt, chat_ids_names, chat_categories):
+    """ Checks if openAI key is valid, if so makes new message, if not return new context 
+        with warning message.
+        
+        Returns:
+            context : Null if openapi key is valid
+    """
+    try:
+        make_newMessage(conversation, obj, prompt)
+        return None
+    except openai.AuthenticationError as e:
+        messages_ = f'<div class="ui massive negative message"><div class="header">Wrong OpenAPI key</div></div>'
+        messages_ = [mark_safe(messages_)]
+        context = get_context(messages_, chat_ids_names, obj.category, chat_categories)
+        return context
     
 @login_required(login_url='signin')
 def home(request):
@@ -107,7 +137,7 @@ def home(request):
 
     obj = ChatInfo.objects.filter(user=user).order_by('-created_at').latest('created_at')
     chat_ids_names = get_chat_ids_names(user, obj.category)
-
+    chat_categories = get_ChatCategories(obj.category)
     chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat)
     if chat_messages.exists():
         conversation.messages = convertChatMessagesToMessages(chat_messages)
@@ -118,9 +148,10 @@ def home(request):
     if request.method == "POST":
         if 'prompt' in request.POST:
             prompt = request.POST["prompt"]
-            response, image = conversation.get_gptFunction(prompt)
-            new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response, image = image)
-            new_msg.save()
+            context = make_validMassage(conversation, obj, prompt, chat_ids_names, chat_categories)
+            if context:
+                return render(request, 'home.html', context=context)
+            return redirect('chat', pk=obj.id_chat)
             
         elif "new_category" in request.POST:
             category = request.POST["new_category"]
@@ -130,14 +161,9 @@ def home(request):
         elif "new_chat" in request.POST:
             return redirect('new_chat', category=obj.category)
    
-    chat_categories = get_ChatCategories(obj.category)
     messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
     messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
-    context = {'messages_': messages_,
-                'chat_ids_names': chat_ids_names,
-                'chat_category': obj.category,
-                'chat_categories': chat_categories
-                }
+    context = get_context(messages_, chat_ids_names, obj.category, chat_categories)
 
     return render(request, 'home.html', context=context)
 
@@ -149,15 +175,15 @@ def new_chat(request, category):
     api_key = "XXX"
     chat_ids_names = get_chat_ids_names(user, category)
     conversation = ChatConversation(user, 20, api_key)
-
+    chat_categories = get_ChatCategories(category)
     if request.method == "POST":
         if 'prompt' in request.POST:
             obj = ChatInfo(user=user, category=category)
             obj.save()
             prompt = request.POST["prompt"]
-            response, image = conversation.get_gptFunction(prompt)
-            new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response, image = image)
-            new_msg.save()
+            context = make_validMassage(conversation, obj, prompt, chat_ids_names, chat_categories)
+            if context:
+                return render(request, 'home.html', context=context)
             return redirect('chat', pk=obj.id_chat)
         
         elif "new_category" in request.POST:
@@ -168,13 +194,8 @@ def new_chat(request, category):
         elif "new_chat" in request.POST:
             return redirect('new_chat', category=category)
     
-    chat_categories = get_ChatCategories(category)
     messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
-    context = {'messages_': messages_,
-                'chat_ids_names': chat_ids_names,
-                'chat_category': category,
-                'chat_categories': chat_categories
-                }
+    context = get_context(messages_, chat_ids_names, category, chat_categories)
 
     return render(request, 'home.html', context=context)
 
@@ -189,6 +210,7 @@ def chat(request, pk):
     chat_ids_names = get_chat_ids_names(user, obj.category)
     conversation = ChatConversation(user, 20, api_key)
     chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
+    chat_categories = get_ChatCategories(obj.category)
     
     if chat_messages.exists():
         conversation.messages = convertChatMessagesToMessages(chat_messages)
@@ -200,10 +222,11 @@ def chat(request, pk):
     if request.method == "POST":
         if 'prompt' in request.POST:
             prompt = request.POST["prompt"]
-            response, image = conversation.get_gptFunction(prompt)
-            new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response, image = image)
-            new_msg.save()
-
+            context = make_validMassage(conversation, obj, prompt, chat_ids_names, chat_categories)
+            if context:
+                return render(request, 'home.html', context=context)
+            return redirect('chat', pk=obj.id_chat)
+            
         elif "new_category" in request.POST:
             category = request.POST["new_category"]
             obj = ChatInfo.objects.filter(user=user, category=category).order_by('-created_at').latest('created_at')
@@ -212,14 +235,9 @@ def chat(request, pk):
         elif "new_chat" in request.POST:
             return redirect('new_chat', category=obj.category)
     
-    chat_categories = get_ChatCategories(obj.category)
     messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
     messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
-    context = {'messages_': messages_,
-                'chat_ids_names': chat_ids_names,
-                'chat_category': obj.category,
-                'chat_categories': chat_categories
-                }
+    context = get_context(messages_, chat_ids_names, obj.category, chat_categories)
 
     return render(request, 'home.html', context=context)
 
