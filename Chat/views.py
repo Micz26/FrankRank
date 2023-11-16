@@ -123,7 +123,7 @@ def make_validMassage(conversation, obj, prompt, chat_ids_names, chat_categories
         make_newMessage(conversation, obj, prompt)
         return None
     except openai.AuthenticationError as e:
-        messages_ = f'<div class="ui massive negative message"><div class="header">Wrong OpenAPI key</div></div>'
+        messages_ = f'</div></div><div class="ui massive negative message"><div class="ui center aligned header">Wrong OpenAPI key</div></div>'
         messages_ = [mark_safe(messages_)]
         context = get_context(messages_, chat_ids_names, obj.category, chat_categories)
         return context
