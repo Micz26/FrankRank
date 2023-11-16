@@ -3,6 +3,7 @@ import requests
 import random
 import regex as re
 import pandas as pd
+import json
 
 class Yahoo:
     def __init__(self, url : str = ''):
@@ -37,7 +38,7 @@ class Yahoo:
         return str(soupText.text)
 
 class NBP(Yahoo):
-    def __init__(self, url : str = ''):
+    def __init__(self, url : str = 'https://www.obligacjeskarbowe.pl/'):
         super().__init__(url) 
         self.soup = ""
         self.offertListLinks = []
@@ -80,13 +81,36 @@ class NBP(Yahoo):
             offer[label] = val                
         return offer
         
-    def get_nbpBondsDataframe(self):
+    def get_nbpBondsdictList(self):
         if not self.offertListLinks:
             self.offertListLinks = self.make_offertListLinks()
         
         dictList = []
         for link in self.offertListLinks:
             dictList.append(self.get_bondOffer(link))
-            
+        
+        return dictList
+    
+    def get_nbpBondsDataframe(self):
+        """ Scrapes bond info from https://www.obligacjeskarbowe.pl/
+        
+            Returns :
+                df : Columns - ['Seria', 'Oprocentowanie', 'Kapitalizacja odsetek', 'Wypłata odsetek',
+                      'Okres oprocentowania', 'Sprzedaż', 'Cena sprzedaży jednej obligacji',
+                      'Cena zamiany jednej obligacji', 'Odsetki']
+        """
+        dictList = self.get_nbpBondsdictList()
         df = pd.DataFrame(dictList)
         return df
+        
+    def get_nbpBondsJSON(self):
+        """ Scrapes bond info from https://www.obligacjeskarbowe.pl/
+        
+            Returns :
+                nbpJson : Columns - ['Seria', 'Oprocentowanie', 'Kapitalizacja odsetek', 'Wypłata odsetek',
+                    'Okres oprocentowania', 'Sprzedaż', 'Cena sprzedaży jednej obligacji',
+                    'Cena zamiany jednej obligacji', 'Odsetki']
+        """
+        dictList = self.get_nbpBondsdictList()
+        nbpJson = json.dumps(dictList)
+        return nbpJson

@@ -5,13 +5,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from .scrapers import Yahoo
 from .blob import uploadChartToBlobStorage
-import time
 from .gpt_functions_desc import gpt_functions_descriptions
 from itertools import chain
 from openai import OpenAI
 import numpy as np
 from wordcloud import WordCloud
-import squarify
 
 class ChatFunctions:
     def __init__(self):
@@ -23,6 +21,94 @@ class ChatFunctions:
                 "display_major_holders": self.display_major_holders,
                 "show_newsPLUSArticles": self.show_newsPLUSArticles
             }
+    
+    def get_stock_value(self, stock_name, time=None):
+        stock_data = yf.Ticker(stock_name).history(period="1d")["Close"][0]
+
+        return json.dumps(stock_data), None
+
+    def interpret_a_chart(self, stock_name, time):
+        stock_data = yf.Ticker(stock_name).history(period=time)
+        plt.figure(figsize=(14,5))
+        fig = sns.lineplot(data=stock_data,x="Date",y='Close')
+
+        url = uploadChartToBlobStorage(fig, self.userName)
+        prices = list(np.around(np.array(stock_data['Close'].to_list()),2))
+        stock_data = f"Interpret this list of days close prices {prices}. Dont show them to user and talk about trend."
+
+        return json.dumps(stock_data), url
+
+    def makeWordCloud(self, text:str):
+        """ Makes and uploades to blob wordcloud 
+            Returns : 
+                url : blob storage url of figure
+        """
+        wordcloud = WordCloud(width=1600, height=800).generate(text)
+        fig = plt.figure(figsize=(14, 5)) 
+        plt.imshow(wordcloud, interpolation="nearest", aspect="auto")
+        plt.tight_layout(pad = 0)
+        plt.axis("off")
+        url = uploadChartToBlobStorage(fig, self.userName)
+        return url
+
+    def show_newsPLUSArticles(self, stock_name, time=None):
+        news_data = yf.Ticker(stock_name).news
+        filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
+
+        cloud = ""
+        news_info = []
+        for news in filtered_news[-1:]:     # displaying more than one news might result in an error
+            title = news['title']
+            link = news['link']
+            scrap = Yahoo(link)
+            article = scrap.get_soupTextYahoo()
+            news_info.append((title, link, article))
+            cloud += article
+        
+        url = self.makeWordCloud(cloud)
+        return json.dumps(news_info), url
+
+    def show_news(self, stock_name, time=None):
+        news_data = yf.Ticker(stock_name).news
+        filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
+
+        news_info = []
+        for news in filtered_news[-3:]:
+            title = news['title']
+            link = news['link']
+            news_info.append((title, link))
+
+        return json.dumps(news_info), None
+
+    def makeHoldersPieChart(self, sizes, labels):
+        fig1, ax1 = plt.subplots(figsize=(14, 5))
+        fig1.subplots_adjust(0.3, 0, 1, 1)
+        theme = plt.get_cmap('gist_ncar')
+        ax1.set_prop_cycle("color", [theme(1. * i / len(sizes)) for i in range(len(sizes))])
+        _, _ = ax1.pie(sizes, startangle=90, radius=1800)
+        ax1.axis('equal')
+        total = sum(sizes)
+        plt.legend(loc='upper left', labels=['%s, %1.1f%%' % (l, (float(s) / total) * 100) for l, s in zip(labels, sizes)],
+                   prop={'size': 11}, bbox_to_anchor=(0.0, 1), bbox_transform=fig1.transFigure)
+        
+        return fig1
+
+    def display_major_holders(self, stock_name, time):
+        ticker = yf.Ticker(stock_name)
+        institutional_holders = ticker.institutional_holders
+        mutualfund_holders = ticker.mutualfund_holders
+        df = pd.DataFrame(institutional_holders)
+        df2 = pd.DataFrame(mutualfund_holders)
+        df = pd.concat([df, df2])
+        df = df[["Holder", "% Out"]]
+        majorSum = int(df['% Out'].sum())
+        other = pd.DataFrame([{"Holder" : "Other holders", "% Out": 1 - majorSum}])
+        df = pd.concat([df, other])
+        
+        fig = self.makeHoldersPieChart(sizes=df["% Out"].astype(float), labels=df['Holder'])
+        url = uploadChartToBlobStorage(fig, self.userName)
+        json_list = json.loads(json.dumps(list(df.T.to_dict().values())))  
+        return json.dumps(json_list), url
 
 class ChatConversation(ChatFunctions):
     """ Class dedicated for controling chat GPT integration
@@ -65,7 +151,7 @@ class ChatConversation(ChatFunctions):
         )
         reply = chatgpt.choices[0].message.content
         self.messages.append({"role": "assistant", "content": reply})
-        self.urlList.append(None)
+
         return reply
 
     def get_messegesHTML(self):
@@ -91,92 +177,6 @@ class ChatConversation(ChatFunctions):
 
         return html
 
-    def get_stock_value(self, stock_name, time=None):
-        stock_data = yf.Ticker(stock_name).history(period="1d")["Close"][0]
-
-        return json.dumps(stock_data), None
-
-    def interpret_a_chart(self, stock_name, time):
-        stock_data = yf.Ticker(stock_name).history(period=time)
-        plt.figure(figsize=(14,5))
-        fig = sns.lineplot(data=stock_data,x="Date",y='Close')
-
-        url = uploadChartToBlobStorage(fig, self.userName)
-        prices = list(np.around(np.array(stock_data['Close'].to_list()),2))
-        stock_data = f"Interpret this list of days close prices {prices}. Dont show them to user and talk about trend."
-
-        return json.dumps(stock_data), url
-
-    def makeWordCloud(self, text:str):
-        """ Makes and uploades to blob wordcloud 
-            Returns : 
-                url : blob storage url of figure
-        """
-        wordcloud = WordCloud(max_font_size=40).generate(text)
-        fig = plt.figure(figsize=(10, 4), dpi=100) 
-        plt.imshow(wordcloud, interpolation="nearest", aspect="auto")
-        plt.tight_layout(pad = 0)
-        plt.axis("off")
-        url = uploadChartToBlobStorage(fig, self.userName)
-        return url
-
-    def show_newsPLUSArticles(self, stock_name, time=None):
-        news_data = yf.Ticker(stock_name).news
-        filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
-
-        cloud = ""
-        news_info = []
-        for news in filtered_news[-1:]:     # displaying more than one news might result in an error
-            title = news['title']
-            link = news['link']
-            scrap = Yahoo(link)
-            article = scrap.get_soupTextYahoo()
-            news_info.append((title, link, article))
-            cloud += article
-        
-        url = self.makeWordCloud(cloud)
-        return json.dumps(news_info), url
-
-    def show_news(self, stock_name, time=None):
-        news_data = yf.Ticker(stock_name).news
-        filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
-
-        news_info = []
-        for news in filtered_news[-3:]:
-            title = news['title']
-            link = news['link']
-            news_info.append((title, link))
-
-        return json.dumps(news_info), None
-
-
-    def display_major_holders(self, stock_name, time):
-        ticker = yf.Ticker(stock_name)
-        institutional_holders = ticker.institutional_holders
-        mutualfund_holders = ticker.mutualfund_holders
-        df = pd.DataFrame(institutional_holders)
-        df2 = pd.DataFrame(mutualfund_holders)
-        df = pd.concat([df, df2])
-        df = df[["Holder", "% Out"]]
-        majorSum = int(df['% Out'].sum())
-        other = pd.DataFrame([{"Holder" : "Other holders", "% Out": 1 - majorSum}])
-        df = pd.concat([df, other])
-        
-        sizes = df["% Out"].astype(float)
-        labels = df['Holder'].str.split().str[0] + ".."
-        fig1, ax1 = plt.subplots(figsize=(8, 5))
-        fig1.subplots_adjust(0.3, 0, 1, 1)
-        theme = plt.get_cmap('gist_ncar')
-        ax1.set_prop_cycle("color", [theme(1. * i / len(sizes)) for i in range(len(sizes))])
-        _, _ = ax1.pie(sizes, startangle=90, radius=1800)
-        ax1.axis('equal')
-        total = sum(sizes)
-        plt.legend(loc='upper left', labels=['%s, %1.1f%%' % (l, (float(s) / total) * 100) for l, s in zip(labels, sizes)],
-            prop={'size': 11}, bbox_to_anchor=(0.0, 1), bbox_transform=fig1.transFigure)
-        
-        url = uploadChartToBlobStorage(fig1, self.userName)
-        json_list = json.loads(json.dumps(list(df.T.to_dict().values())))  
-        return json.dumps(json_list), url
 
     def get_gptFunction(self, message):
         url = None
@@ -196,15 +196,7 @@ class ChatConversation(ChatFunctions):
         if tool_calls:
             for tool_call in tool_calls:
                 function_name = tool_call.function.name
-                
-                available_functions = {
-                "get_stock_value": self.get_stock_value,
-                "interpret_a_chart": self.interpret_a_chart,
-                "show_news": self.show_news,
-                "display_major_holders": self.display_major_holders,
-                "show_newsPLUSArticles": self.show_newsPLUSArticles
-                }
-                function_to_call = available_functions[function_name]
+                function_to_call = self.available_functions[function_name]
                 function_args = json.loads(tool_call.function.arguments)
                 function_response = function_to_call(
                     stock_name=function_args.get("chosen_stock"),
@@ -246,7 +238,6 @@ class ChatConversation(ChatFunctions):
                 row["prompt"] = item["content"]
 
             if i == 2:
-                # row["url"] = self.urlList[len(self.messagesJSON) - 1]
                 row["url"] = self.urlList[-1]
                 self.messagesJSON.append(row)
                 row = {}
