@@ -136,8 +136,10 @@ class ChatConversation(ChatFunctions):
         self.htmlChart = ""
         self.client = OpenAI(api_key=api_key)
         self.messagesJSON = []
-        self.urlList = [None]
+        self.urlList = [None] # might result in an error; TBR in case of an error
         self.api_key = api_key
+        self.model = "gpt-3.5-turbo-1106"
+
 
     def get_gptResponse(self, message: str) -> list:
         """ Connect with Chatgpt and generates response
@@ -153,7 +155,7 @@ class ChatConversation(ChatFunctions):
             {"role": "user", "content": message},
         )
         chatgpt = self.client.completions.create(
-            model="gpt-3.5-turbo", messages=self.messages
+            model=self.model, messages=self.messages
         )
         reply = chatgpt.choices[0].message.content
         self.messages.append({"role": "assistant", "content": reply})
@@ -189,7 +191,7 @@ class ChatConversation(ChatFunctions):
             {"role": "user", "content": message},
         )
         response = self.client.chat.completions.create(
-            model="gpt-3.5-turbo-1106",
+            model=self.model,
             messages=self.messages,
             tools=self.functions,
             tool_choice="auto",
@@ -210,17 +212,17 @@ class ChatConversation(ChatFunctions):
                 )
 
                 res, url = function_response
-                self.messages.append(response_message)
+                #self.messages.append(response_message)
                 self.messages.append(
                     {
                         "tool_call_id": tool_call.id,
-                        "role": "tool",
+                        "role": "function",
                         "name": function_name,
                         "content": res,
                     })
 
                 response = self.client.chat.completions.create(
-                    model="gpt-3.5-turbo-1106",
+                    model=self.model,
                     messages=self.messages)
 
                 break
@@ -269,7 +271,6 @@ class ChatConversation(ChatFunctions):
         return self.messages
 
     def convertMessegesObjToHTML(self, messages_):
-        chathistory = []
         html = ""
         html += "<div class=\"ui segment\"><h4 class=\"ui dividing header\">Advisor:</h4>"
         html += f'<div class =\"content\"><p>Hello {self.userName}!</div></div>'
@@ -281,12 +282,7 @@ class ChatConversation(ChatFunctions):
                 rowAssistant = row["response"]
                 rowUser = row["prompt"]
                 image = row["image"]
-
-                Assistant = {"role": "assistant", "content": rowAssistant}
-                User = {"role": "assistant", "content": rowUser}
-                chathistory.append(Assistant)
-                chathistory.append(User)
-
+ 
                 html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
                 html += f'<div class =\"content\"><p>{rowUser}</div></div>'
 
@@ -297,43 +293,31 @@ class ChatConversation(ChatFunctions):
                     html += chart
                 else:
                     html += '</div>'
-
-            self.messages = chathistory
-
+                        
         return html
 
 
-def generate_chat_name(api_key, user_prompt, gpt_response, model="gpt-3.5-turbo"):
-    client = OpenAI(
-        api_key=api_key,
-    )
+    def generate_chat_name(self, user_prompt, gpt_response):
+        prompt = f"Create a chat name for a conversation where the user asks: '{user_prompt}' and the AI responds: '{gpt_response}'"
 
-    prompt = f"Create a chat name for a conversation where the user asks: '{user_prompt}' and the AI responds: '{gpt_response}'"
+        response = self.client.chat.completions.create(
+            model = self.model,
+            messages=[
+                {"role": "system", "content": "You are ChatGPT name generator, a large language model trained by OpenAI."},
+                {"role": "user", "content": prompt}
+            ]
+        )
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": "You are ChatGPT name generator, a large language model trained by OpenAI."},
-            {"role": "user", "content": prompt}
-        ]
-    )
+        chat_name = response.choices[0].message.content
+        return chat_name
 
-    chat_name = response.choices[0].message.content
-    return chat_name
-
-
-def convertChatMessagesToMessages(chat_messages):
-    messages = []
-    for chat_message in chat_messages:
-        rowAssistant = {"role": "assistant", "content": chat_message.response}
-        rowUser = {"role": "user", "content": chat_message.prompt}
-
-        messages.append(rowAssistant)
-        messages.append(rowUser)
-
-    return messages
-
-
-def convertToFeed(chat_messages):
-    messages_ = list(chain(*chat_messages))
-    return messages_
+    def convertChatMessagesToMessages(self, chat_messages):
+        """ Takes chat messages form database and converts it to OpenAI object,
+            must be declared before promt
+        """
+        self.messages = []
+        for chat_message in chat_messages:
+            rowAssistant = {"role": "assistant", "content": chat_message.response}
+            rowUser = {"role": "user", "content": chat_message.prompt}
+            self.messages.append(rowAssistant)
+            self.messages.append(rowUser)
