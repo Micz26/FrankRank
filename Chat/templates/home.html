@@ -18,7 +18,7 @@
     <div class="four wide column">
         <!--class="ui segment" style="height: calc(100vh - 80px); margin-left: 1vw;"-->
         <div >
-            <div class = "ui raised segment" style = "overflow-y: scroll; height: calc(100vh - 90px); margin-left: 1.5vw; width: 23vw;">
+            <div class = "ui segment" style = "overflow-y: scroll; height: calc(100vh - 90px); margin-left: 2vw; width: 23.3vw;;">
                 <h3 class="ui dividing header">Category</h3>
                     <form method="POST">
                         {% csrf_token %}
@@ -43,9 +43,10 @@
                             <div class="ui vertical fluid pointing menu">
                                 {% for chat_id_name in chat_ids_names %}
                                     {% if chat_id_name.0 == id_chat %}
-                                        <a class="active item" href="/chat/{{chat_id_name.0}}">{{ chat_id_name.1 }}</a>                                    
-                                    {% endif %}
-                                    <a class="item" href="/chat/{{chat_id_name.0}}">{{ chat_id_name.1 }}</a>    
+                                        <a class="active item" href="/chat/{{chat_id_name.0}}">{{ chat_id_name.1 }}</a> 
+                                        {% else %}
+                                        <a class="item" href="/chat/{{chat_id_name.0}}">{{ chat_id_name.1 }}</a>                                     
+                                    {% endif %}  
                                 {% endfor %}
                         </form>
                     </div>
@@ -54,8 +55,8 @@
     </div>
 
     <div class="eleven wide column" >
-        <div class = "ui segment" id = "myform">
-            <div id = "scrollMesseges" style="overflow-y: scroll; max-height: calc(100vh - 82px - 80px)">
+        <div class = "ui segment" id = "myform" style = "border: 1px solid white; box-shadow: none; margin-right: 2vw; width: 73vw;">
+            <div id = "scrollMesseges" style="overflow-y: scroll; max-height: calc(100vh - 60px - 80px)">
                 {% for message in messages_ %}
                     <div class="alert alert-danger" role="alert">
                         {{ message }}
