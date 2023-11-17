@@ -16,24 +16,23 @@
 <div class="three column row">
 
     <div class="four wide column">
-        <div class="ui tertiary segment" style="height: calc(100vh - 80px); margin-left: 1vw;">
-            <div class = "ui segment" style = "overflow-y: scroll; height: calc(100vh - 110px)">
-                <h3 class="ui header">Category - <div class="item">{{ chat_category }}</div></h3>
-
+        <!--class="ui segment" style="height: calc(100vh - 80px); margin-left: 1vw;"-->
+        <div >
+            <div class = "ui raised segment" style = "overflow-y: scroll; height: calc(100vh - 90px); margin-left: 1.5vw; width: 23vw;">
+                <h3 class="ui dividing header">Category</h3>
                     <form method="POST">
                         {% csrf_token %}
                         <div class="ui action fluid input">
-                            <select name="new_category" class="ui fluid dropdown">
+                            <select name="new_category" class="ui fluid pointing  menu">
                                 {% for category in chat_categories %}
                                     <option class = "item" value="{{ category }}">{{ category }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        
+                        </br>
                         <button type="submit" class="ui fluid button" >Change Category</button>
-                        <div class="ui divider"></div>
                         </form>
-
+                        <h3 class="ui dividing header">Saved chats</h3>
                         <form method="POST">
                             <button type="button" class="ui fluid button" name="new_chat" id = "newChatButton">
                                 <a href="/new_chat/{{chat_category}}" style="color: #616161"  >New Chat</a>
@@ -41,10 +40,12 @@
                         </form>
                         <form method="POST">
                         {% csrf_token %}
-
-                            <div class="ui vertical fluid menu">
+                            <div class="ui vertical fluid pointing menu">
                                 {% for chat_id_name in chat_ids_names %}
-                                    <a class="item" href="/chat/{{chat_id_name.0}}">{{ chat_id_name.1 }}</a>
+                                    {% if chat_id_name.0 == id_chat %}
+                                        <a class="active item" href="/chat/{{chat_id_name.0}}">{{ chat_id_name.1 }}</a>                                    
+                                    {% endif %}
+                                    <a class="item" href="/chat/{{chat_id_name.0}}">{{ chat_id_name.1 }}</a>    
                                 {% endfor %}
                         </form>
                     </div>
@@ -53,17 +54,15 @@
     </div>
 
     <div class="eleven wide column" >
-        <div class = "ui segment" >
-            <div id = "scrollMesseges" style="overflow-y: scroll; max-height: calc(100vh - 75px - 80px)">
+        <div class = "ui segment" id = "myform">
+            <div id = "scrollMesseges" style="overflow-y: scroll; max-height: calc(100vh - 82px - 80px)">
                 {% for message in messages_ %}
                     <div class="alert alert-danger" role="alert">
                         {{ message }}
                     </div>
                 {% endfor %}
-                <script>
-                    var objDiv = document.getElementById("scrollMesseges");
-                    objDiv.scrollTop = objDiv.scrollHeight;
-                </script>
+                <div id="myDIV" style="display:none"><div class="ui segment"><h4 class="ui dividing header">Advisor:</h4><br /><span class="dots-cont"> 
+                    <span class="dot dot-1"></span> <span class="dot dot-2"></span> <span class="dot dot-3"></span> </span></div></div>
             </div>
 
             {% if reply_content %}
@@ -71,13 +70,13 @@
                     {{ reply_content }}
                 </div>
             {% endif %}
-            <form method="POST">
+            <form method="POST" >
                 {% csrf_token %}
             <div class="ui form">
                 <div class="prompt-field">
                         <div class="ui fluid action input">
                             <input type="text" name="prompt" placeholder="prompt" class="ui input">
-                            <button type="submit" class="ui button">Click to send prompt<i></i></button>
+                            <button type="submit" class="ui button" onclick="myFunction()">Click to send prompt<i></i></button>
                         </div>
                     </form>
                 </div>
@@ -90,8 +89,10 @@
 
 </div>
 
-
 <script>
+    var objDiv = document.getElementById("scrollMesseges");
+    objDiv.scrollTop = objDiv.scrollHeight;
+
     $(document).ready(function(){
         $('#category-dropdown').dropdown();
     });
@@ -102,8 +103,16 @@
     function refreshPage(){
         window.parent.location = window.parent.location.href;
     } 
-
+    function myFunction() {
+    var x = document.getElementById("myDIV");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+    } else {
+      x.style.display = "none";
+    }
+  }
 </script>
+
 {% endblock %}
 
 

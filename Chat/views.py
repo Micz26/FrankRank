@@ -104,11 +104,12 @@ def make_newMessage(conversation, obj, prompt):
     new_msg = ChatMessage(id_chat=obj, prompt=prompt, response=response, image = image)
     new_msg.save()
     
-def get_context(messages_, chat_ids_names, category, chat_categories):
+def get_context(messages_, chat_ids_names, category, chat_categories, id_chat):
     context = {'messages_': messages_,
             'chat_ids_names': chat_ids_names,
             'chat_category': category,
-            'chat_categories': chat_categories
+            'chat_categories': chat_categories,
+            'id_chat' : id_chat
             }
     return context
 
@@ -130,7 +131,7 @@ def make_validMessage(conversation, obj, prompt, chat_ids_names, chat_categories
     except openai.AuthenticationError as e:
         messages_ = f'</div></div><div class="ui massive negative message"><div class="ui center aligned header">Wrong OpenAPI key</div></div>'
         messages_ = [mark_safe(messages_)]
-        context = get_context(messages_, chat_ids_names, obj.category, chat_categories)
+        context = get_context(messages_, chat_ids_names, obj.category, chat_categories, obj.id_chat)
         return context
     
 @login_required(login_url='signin')
@@ -167,7 +168,7 @@ def home(request):
    
     messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
     messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
-    context = get_context(messages_, chat_ids_names, obj.category, chat_categories)
+    context = get_context(messages_, chat_ids_names, obj.category, chat_categories, obj.id_chat)
 
     return render(request, 'home.html', context=context)
 
@@ -199,7 +200,7 @@ def new_chat(request, category):
             return redirect('new_chat', category=category)
     
     messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
-    context = get_context(messages_, chat_ids_names, category, chat_categories)
+    context = get_context(messages_, chat_ids_names, category, chat_categories, "")
 
     return render(request, 'home.html', context=context)
 
@@ -240,7 +241,7 @@ def chat(request, pk):
     
     messages_ = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')
     messages_ = [mark_safe(conversation.convertMessegesObjToHTML(messages_))]
-    context = get_context(messages_, chat_ids_names, obj.category, chat_categories)
+    context = get_context(messages_, chat_ids_names, obj.category, chat_categories, obj.id_chat)
 
     return render(request, 'home.html', context=context)
 

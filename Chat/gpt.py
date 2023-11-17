@@ -279,7 +279,7 @@ class ChatConversation(ChatFunctions):
             result = messages_.values()
             DictList = [entry for entry in result]
             for i, row in enumerate(DictList):
-                rowAssistant = row["response"]
+                rowAssistant = row["response"].replace("\n", "<br />")
                 rowUser = row["prompt"]
                 image = row["image"]
  
