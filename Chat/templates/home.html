@@ -18,7 +18,7 @@
     <div class="four wide column">
         <!--class="ui segment" style="height: calc(100vh - 80px); margin-left: 1vw;"-->
         <div >
-            <div class = "ui segment" style = "overflow-y: scroll; height: calc(100vh - 90px); margin-left: 2vw; width: 23.3vw;;">
+            <div class = "ui segment" style = "overflow-y: scroll; height: calc(100vh - 90px); margin-left: 2vw; width: 23.3vw;border: 1px solid rgb(189, 188, 188);">
                 <h3 class="ui dividing header">Category</h3>
                     <form method="POST">
                         {% csrf_token %}
@@ -30,12 +30,12 @@
                             </select>
                         </div>
                         </br>
-                        <button type="submit" class="ui fluid button" >Change Category</button>
+                        <button type="submit" class="ui fluid secondary basic button" ><strong>Change Category</strong></button>
                         </form>
                         <h3 class="ui dividing header">Saved chats</h3>
                         <form method="POST">
-                            <button type="button" class="ui fluid button" name="new_chat" id = "newChatButton">
-                                <a href="/new_chat/{{chat_category}}" style="color: #616161"  >New Chat</a>
+                            <button type="button" class="ui fluid secondary basic button" name="new_chat" id = "newChatButton">
+                                <a href="/new_chat/{{chat_category}}" style="color: #000000"><strong>New Chat</strong></a>
                             </button>
                         </form>
                         <form method="POST">
@@ -76,8 +76,8 @@
             <div class="ui form">
                 <div class="prompt-field">
                         <div class="ui fluid action input">
-                            <input type="text" name="prompt" placeholder="prompt" class="ui input">
-                            <button type="submit" class="ui button" onclick="myFunction()">Click to send prompt<i></i></button>
+                            <input type="text" name="prompt" placeholder="prompt" class="ui input" autocomplete="off">
+                            <button type="submit" class="ui secondary basic button" onclick="myFunction()" ><strong>Click to send prompt</strong></button>
                         </div>
                     </form>
                 </div>
