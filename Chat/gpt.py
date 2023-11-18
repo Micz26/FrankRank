@@ -298,12 +298,19 @@ class ChatConversation(ChatFunctions):
 
 
     def generate_chat_name(self, user_prompt, gpt_response):
-        prompt = f"Create a chat name for a conversation where the user asks: '{user_prompt}' and the AI responds: '{gpt_response}'"
+        prompt = f"Create a chat name for a conversation where the user asks: '{user_prompt}' and the AI responds: " \
+                 f"'{gpt_response}'. Respond only with the answer, DO NOT add any excess words nor quotation marks." \
+                 f"ALWAYS Insert whitespaces where needed. DO NOT ANSWER WITH UNSEPARATED WORDS, ALWAYS ADD WHITESPACES"
 
         response = self.client.chat.completions.create(
             model = self.model,
             messages=[
-                {"role": "system", "content": "You are ChatGPT name generator, a large language model trained by OpenAI."},
+                {"role": "system", "content": "You are ChatGPT name generator, a large language model trained by OpenAI,"
+                                              "who reply only with the answer without any excess explanations or words."
+                                              "You dont provide any other information than created chat name."
+                                              "You use correct orthography rules and include whitespaces where needed"
+                                              "IMPORTANT: You will not answer with words not separated by whitespaces."
+                                              "YOU WILL ALWAYS ADD WHITESPACES"},
                 {"role": "user", "content": prompt}
             ]
         )
