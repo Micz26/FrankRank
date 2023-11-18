@@ -15,7 +15,7 @@
     <div class = "ui menu"></div>
     <div class = "ui hidden divider"></div>
     <div class="ui segment">
-        <div class="ui segment">            
+        <div class="ui segment">
             <h2 class="ui center aligned header">Create account</h2>
             <div class = "ui form">
                 <form action="" method="post">
@@ -82,7 +82,12 @@
                     {% endfor %}
             {% endif %}
             </div>
-    
+            <div class="ui center aligned header">
+                {% load socialaccount %}
+                <h2>Google sign up</h2>
+                <a href="{% provider_login_url 'google' %}?next=/api">Sign up with Google</a>
+            </div>
+
             <div class="ui message">
                 <p class="text-base">Already have an account? <a href="/signin">Sign In</a></p>
             </div>
@@ -92,5 +97,6 @@
 
 </div>
 {% endblock %}
+
 
 

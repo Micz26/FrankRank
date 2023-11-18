@@ -35,6 +35,7 @@
                                 <input type="submit" value="Sign In" class="ui fluid large submit button">
                             </div> 
                         </div>
+                    </form>
                 </div>
                 {% if messages %}
                 <div class="ui warning message">
@@ -44,14 +45,21 @@
                 </div>
                 {% endif %}
             </div>
-        
+                 {% load socialaccount %}
+                <html>
+                <body>
+                {% if user.is_authenticated %}
+                  <p>Welcome, You are logged in as {{ user.username }</p>
+                {% else %}}
+                  <a href="{% provider_login_url 'google' %}?next=/">Login With Google</a>
+                {% endif %}
+                </body>
+                </html>
             <div class="ui message">
                 <p class="text-base">You do not have an account yet? <a href="/signup">Sign up</a></p>
             </div>
         </div>
-        
-        
-        </form>
+
     </div>
 </div>
 

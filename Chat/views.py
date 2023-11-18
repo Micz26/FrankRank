@@ -7,10 +7,13 @@ from django.contrib.auth.decorators import login_required
 from django.utils.safestring import mark_safe
 from urllib.parse import quote
 import openai
+from allauth.account.signals import user_signed_up
+from django.dispatch import receiver
 
 from .gpt import ChatConversation, convertChatMessagesToMessages, generate_chat_name
 from .models import Profile, ChatInfo, UserInfo, ChatMessage
 import json
+
 
 
 def signup(request):
@@ -37,22 +40,9 @@ def signup(request):
 
                 user_login = auth.authenticate(username=username, password=password)
                 auth.login(request, user_login)
-                user_model = User.objects.get(username=username)
-                new_profile = Profile.objects.create(user=user_model, id_user=user_model.id,
-                                                     openai_api_key=openai_api_key)
-                new_profile.save()
-                user = request.user.username
 
-                obj_investments = ChatInfo(user=user, category='Investments')
-                obj_investments.save()
-                obj_insurance = ChatInfo(user=user, category='Insurance')
-                obj_insurance.save()
-                obj_car_insurance = ChatInfo(user=user, category='Car Insurance')
-                obj_car_insurance.save()
-                obj_personal_finance = ChatInfo(user=user, category='Personal Finance')
-                obj_personal_finance.save()
 
-                return redirect('/settings')
+                return redirect('/api')
         else:
             messages.info(request, 'Hasła nie są takie same')
             return redirect('signup')
@@ -60,6 +50,29 @@ def signup(request):
     else:
         return render(request, 'signup.html')
 
+def api(request):
+    username = request.user.username
+    if request.method == "POST":
+        openai_api_key = request.POST['Open ai api key']
+
+        user_model = User.objects.get(username=username)
+        new_profile = Profile.objects.create(user=user_model, id_user=user_model.id,
+                                             openai_api_key=openai_api_key)
+        new_profile.save()
+        user = request.user.username
+
+        obj_investments = ChatInfo(user=user, category='Investments')
+        obj_investments.save()
+        obj_insurance = ChatInfo(user=user, category='Insurance')
+        obj_insurance.save()
+        obj_car_insurance = ChatInfo(user=user, category='Car Insurance')
+        obj_car_insurance.save()
+        obj_personal_finance = ChatInfo(user=user, category='Personal Finance')
+        obj_personal_finance.save()
+
+        return redirect('/settings')
+
+    return render(request, 'api.html')
 
 def signin(request):
     if request.method == "POST":
