@@ -51,7 +51,7 @@
                 {% if user.is_authenticated %}
                   <p>Welcome, You are logged in as {{ user.username }</p>
                 {% else %}}
-                  <a href="{% provider_login_url 'google' %}?next=/">Login With Google</a>
+                  <a href="{% provider_login_url 'google' %}?process=signin&next=/">Login With Google</a>
                 {% endif %}
                 </body>
                 </html>

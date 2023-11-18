@@ -9,12 +9,29 @@ from urllib.parse import quote
 import openai
 from allauth.account.signals import user_signed_up
 from django.dispatch import receiver
+from allauth.socialaccount.models import SocialAccount
 
 from .gpt import ChatConversation, convertChatMessagesToMessages, generate_chat_name
 from .models import Profile, ChatInfo, UserInfo, ChatMessage
 import json
 
 
+
+def makeprofile(username, openai_api_key, request):
+    user_model = User.objects.get(username=username)
+    new_profile = Profile.objects.create(user=user_model, id_user=user_model.id,
+                                         openai_api_key=openai_api_key)
+    new_profile.save()
+    user = request.user.username
+
+    obj_investments = ChatInfo(user=user, category='Investments', name_chat="First Investments Chat")
+    obj_investments.save()
+    obj_insurance = ChatInfo(user=user, category='Insurance', name_chat="First Insurance Chat")
+    obj_insurance.save()
+    obj_car_insurance = ChatInfo(user=user, category='Car Insurance', name_chat="First Car Insurance Chat")
+    obj_car_insurance.save()
+    obj_personal_finance = ChatInfo(user=user, category='Personal Finance', name_chat="First Personal Finance Chat")
+    obj_personal_finance.save()
 
 def signup(request):
     if request.method == "POST":
@@ -32,17 +49,16 @@ def signup(request):
             elif User.objects.filter(username=username).exists():
                 messages.info(request, 'Nazwa użytkownia jest zajęta')
                 return redirect('signup')
-
             else:
-
                 user = User.objects.create_user(username=username, email=email, password=password)
                 user.save()
 
                 user_login = auth.authenticate(username=username, password=password)
                 auth.login(request, user_login)
 
+                makeprofile(username, openai_api_key, request)
 
-                return redirect('/api')
+                return redirect('/settings')
         else:
             messages.info(request, 'Hasła nie są takie same')
             return redirect('signup')
@@ -52,23 +68,12 @@ def signup(request):
 
 def api(request):
     username = request.user.username
+    if User.objects.filter(username=username).first():
+        return redirect('/')
     if request.method == "POST":
         openai_api_key = request.POST['Open ai api key']
 
-        user_model = User.objects.get(username=username)
-        new_profile = Profile.objects.create(user=user_model, id_user=user_model.id,
-                                             openai_api_key=openai_api_key)
-        new_profile.save()
-        user = request.user.username
-
-        obj_investments = ChatInfo(user=user, category='Investments')
-        obj_investments.save()
-        obj_insurance = ChatInfo(user=user, category='Insurance')
-        obj_insurance.save()
-        obj_car_insurance = ChatInfo(user=user, category='Car Insurance')
-        obj_car_insurance.save()
-        obj_personal_finance = ChatInfo(user=user, category='Personal Finance')
-        obj_personal_finance.save()
+        makeprofile(username, openai_api_key, request)
 
         return redirect('/settings')
 

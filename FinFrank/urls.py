@@ -22,4 +22,4 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
 ]
 
-# / w chat, urle w settings
+

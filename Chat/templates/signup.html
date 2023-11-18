@@ -70,7 +70,7 @@
 
                     <div class="field">
                         <div class="form-group">
-                            <button type="submit" class="ui fluid button">Sign Up</button>
+                            <button type="submit" class="ui fluid button">Sign up</button>
                         </div>
                     </div>
                 </form>
@@ -85,7 +85,7 @@
             <div class="ui center aligned header">
                 {% load socialaccount %}
                 <h2>Google sign up</h2>
-                <a href="{% provider_login_url 'google' %}?next=/api">Sign up with Google</a>
+                <a href="{% provider_login_url 'google' %}?process=signup&next=/api">Sign up with Google</a>
             </div>
 
             <div class="ui message">

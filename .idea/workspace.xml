@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ec71ae9a-2f44-4276-a7e4-5a950fac4fb9" name="Changes" comment="Added function: displayin major holders">
+    <list default="true" id="ec71ae9a-2f44-4276-a7e4-5a950fac4fb9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Chat/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Chat/migrations/0002_auto_20231104_1558.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Chat/migrations/0002_chatinfo_created_at_alter_chatinfo_category.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Chat/migrations/0003_merge_20231109_1434.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Chat/migrations/0003_remove_chatinfo_chat_chatmessage.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Chat/migrations/0004_auto_20231110_1637.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Chat/templates/signin.html" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/templates/signin.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Chat/templates/signup.html" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/templates/signup.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Chat/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FinFrank/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/FinFrank/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FinFrank/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/FinFrank/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
     </list>
@@ -66,7 +58,14 @@
       <option name="project" value="LOCAL" />
       <updated>1698431357386</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Added function: login with google">
+      <created>1700319349923</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1700319349923</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -82,7 +81,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Added function: displayin major holders" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added function: displayin major holders" />
+    <MESSAGE value="Added function: login with google" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added function: login with google" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
