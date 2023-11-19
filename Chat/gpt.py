@@ -6,6 +6,7 @@ import seaborn as sns
 from .scrapers import Yahoo
 from .blob import uploadChartToBlobStorage
 from .gpt_functions_desc import gpt_functions_descriptions
+from .forecast import Forecast
 from itertools import chain
 from openai import OpenAI
 import numpy as np
@@ -19,7 +20,8 @@ class ChatFunctions:
             "get_stock_value": self.get_stock_value,
             "interpret_a_chart": self.interpret_a_chart,
             "display_major_holders": self.display_major_holders,
-            "show_newsPLUSArticles": self.show_newsPLUSArticles
+            "show_newsPLUSArticles": self.show_newsPLUSArticles,
+            "get_stock_forecast": self.get_stock_forecast
         }
 
     def get_stock_value(self, stock_name, time=None, api_key=None):
@@ -115,6 +117,22 @@ class ChatFunctions:
         json_list = json.loads(json.dumps(list(df.T.to_dict().values())))
         return json.dumps(json_list), url
 
+    def get_stock_forecast(self, stock_name, time=None, api_key=None):
+        forecast_model = Forecast(stock_name)
+        forecast_result = forecast_model.get_LagRegYearStockForecast()
+        predicted_values = forecast_result["pred"].tolist()
+        forecast_df = pd.DataFrame({"Date": forecast_result.index, "Close": predicted_values})
+
+        plt.figure(figsize=(14, 5))
+        fig = sns.lineplot(data=forecast_df, x="Date", y='Close')
+        url = uploadChartToBlobStorage(fig, self.userName)
+
+        prices = list(np.around(np.array(predicted_values)))
+        forecast_data = f"Interpret this list of forecasted values: {prices}. " \
+                        f"Dont show them to user and talk about trend, but tell user that this is only a forecast."
+
+        return json.dumps(forecast_data), url
+
 
 class ChatConversation(ChatFunctions):
     """ Class dedicated for controling chat GPT integration
@@ -136,10 +154,9 @@ class ChatConversation(ChatFunctions):
         self.htmlChart = ""
         self.client = OpenAI(api_key=api_key)
         self.messagesJSON = []
-        self.urlList = [None] # might result in an error; TBR in case of an error
+        self.urlList = [None]  # might result in an error; TBR in case of an error
         self.api_key = api_key
         self.model = "gpt-3.5-turbo-1106"
-
 
     def get_gptResponse(self, message: str) -> list:
         """ Connect with Chatgpt and generates response
@@ -212,7 +229,7 @@ class ChatConversation(ChatFunctions):
                 )
 
                 res, url = function_response
-                #self.messages.append(response_message)
+                # self.messages.append(response_message)
                 self.messages.append(
                     {
                         "tool_call_id": tool_call.id,
@@ -282,7 +299,7 @@ class ChatConversation(ChatFunctions):
                 rowAssistant = row["response"].replace("\n", "<br />")
                 rowUser = row["prompt"]
                 image = row["image"]
- 
+
                 html += F"<div class=\"ui secondary segment\"><h4 class=\"ui dividing header\">{self.userName}:</h4>"
                 html += f'<div class =\"content\"><p>{rowUser}</div></div>'
 
@@ -293,9 +310,8 @@ class ChatConversation(ChatFunctions):
                     html += chart
                 else:
                     html += '</div>'
-                        
-        return html
 
+        return html
 
     def generate_chat_name(self, user_prompt, gpt_response):
         prompt = f"Create a chat name for a conversation where the user asks: '{user_prompt}' and the AI responds: " \
@@ -303,14 +319,15 @@ class ChatConversation(ChatFunctions):
                  f"ALWAYS Insert whitespaces where needed. DO NOT ANSWER WITH UNSEPARATED WORDS, ALWAYS ADD WHITESPACES"
 
         response = self.client.chat.completions.create(
-            model = self.model,
+            model=self.model,
             messages=[
-                {"role": "system", "content": "You are ChatGPT name generator, a large language model trained by OpenAI,"
-                                              "who reply only with the answer without any excess explanations or words."
-                                              "You dont provide any other information than created chat name."
-                                              "You use correct orthography rules and include whitespaces where needed"
-                                              "IMPORTANT: You will not answer with words not separated by whitespaces."
-                                              "YOU WILL ALWAYS ADD WHITESPACES"},
+                {"role": "system",
+                 "content": "You are ChatGPT name generator, a large language model trained by OpenAI,"
+                            "who reply only with the answer without any excess explanations or words."
+                            "You dont provide any other information than created chat name."
+                            "You use correct orthography rules and include whitespaces where needed"
+                            "IMPORTANT: You will not answer with words not separated by whitespaces."
+                            "YOU WILL ALWAYS ADD WHITESPACES"},
                 {"role": "user", "content": prompt}
             ]
         )
