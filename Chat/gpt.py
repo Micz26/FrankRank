@@ -7,7 +7,6 @@ from .scrapers import Yahoo
 from .blob import uploadChartToBlobStorage
 from .gpt_functions_desc import gpt_functions_descriptions
 from .forecast import Forecast
-from itertools import chain
 from openai import OpenAI
 import numpy as np
 from wordcloud import WordCloud
@@ -121,14 +120,17 @@ class ChatFunctions:
         forecast_model = Forecast(stock_name)
         forecast_result = forecast_model.get_LagRegYearStockForecast()
         predicted_values = forecast_result["pred"].tolist()
-        forecast_df = pd.DataFrame({"Date": forecast_result.index, "Close": predicted_values})
+        forecast_df = pd.DataFrame({"Date": forecast_result.index, "Predictions": predicted_values})
 
-        plt.figure(figsize=(14, 5))
-        fig = sns.lineplot(data=forecast_df, x="Date", y='Close')
+        fig = plt.figure(figsize=(14, 5))
+        plt.plot(forecast_df["Date"], forecast_df['Predictions'], color='blue')
+        plt.plot(forecast_model.df.index, forecast_model.df['Close'], color='red')
+        plt.legend(labels=['Predictions', 'Past prices'])
         url = uploadChartToBlobStorage(fig, self.userName)
 
+        past = list(np.around(np.array(forecast_model.df["Close"].tolist())))
         prices = list(np.around(np.array(predicted_values)))
-        forecast_data = f"Interpret this list of forecasted values: {prices}. " \
+        forecast_data = f"Interpret this list of forecasted values: {prices} and past year {past[-12:]}" \
                         f"Dont show them to user and talk about trend, but tell user that this is only a forecast."
 
         return json.dumps(forecast_data), url
@@ -229,7 +231,6 @@ class ChatConversation(ChatFunctions):
                 )
 
                 res, url = function_response
-                # self.messages.append(response_message)
                 self.messages.append(
                     {
                         "tool_call_id": tool_call.id,

@@ -115,7 +115,6 @@ def get_context(messages_, chat_ids_names, category, chat_categories, id_chat):
 
 def make_chatName(obj, conversation, prompt, response):
     obj.name_chat = conversation.generate_chat_name(prompt, response)
-    #obj.response = conversation.messages[0]["content"]
     obj.save()
 
 def make_validMessage(conversation, obj, prompt, chat_ids_names, chat_categories):
@@ -136,7 +135,7 @@ def make_validMessage(conversation, obj, prompt, chat_ids_names, chat_categories
     
 @login_required(login_url='signin')
 def home(request):
-    api_key = "XXX"
+    api_key = "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"
     user = request.user.username
     # declaring ChatConversation class for gpt
     conversation = ChatConversation(user, 20, api_key)
@@ -177,7 +176,7 @@ def home(request):
 def new_chat(request, category):
     messages_ = []
     user = request.user.username
-    api_key = "XXX"
+    api_key = "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"
     chat_ids_names = get_chat_ids_names(user, category)
     conversation = ChatConversation(user, 20, api_key)
     chat_categories = get_ChatCategories(category)
@@ -209,7 +208,7 @@ def new_chat(request, category):
 @login_required(login_url='signin')
 def chat(request, pk):
     obj = ChatInfo.objects.get(id_chat=pk)
-    api_key = "XXX"
+    api_key = "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"
     user = request.user.username
 
     chat_ids_names = get_chat_ids_names(user, obj.category)

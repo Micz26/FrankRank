@@ -48,9 +48,9 @@ class Forecast:
         predDF.index = index
 
         predDF = pd.concat([self.df, predDF])
-        predDF['Lag_1'] = predDF['Close'].shift(3)
-        predDF['Lag_2'] = predDF['Close'].shift(6)
-        predDF['Lag_3'] = predDF['Close'].shift(12)
+        predDF['Lag_1'] = predDF['Close'].shift(12)
+        predDF['Lag_2'] = predDF['Lag_1'].shift(-6)
+        predDF['Lag_3'] = predDF['Lag_1'].shift(-3)
         predDF.fillna(method="ffill", inplace=True)
         predDF = predDF[self.df["Time"].max() <= predDF["Time"]]
 
@@ -76,7 +76,7 @@ class Forecast:
         model.fit(X, y)
 
         rng = np.arange(years * 12) + len(self.df.index)
-        start = pd.to_datetime(self.df.index.max())
+        start = pd.to_datetime(self.df.index.max() - pd.DateOffset(months=1))
         index = pd.date_range(start, periods=years * 12, freq='M')
         predDF = pd.DataFrame({"Time": rng})
         predDF.index = index
