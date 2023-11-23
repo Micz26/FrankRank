@@ -3,7 +3,7 @@ import json
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from .scrapers import Yahoo
+from .scrapers import Yahoo, NBP
 from .blob import uploadChartToBlobStorage
 from .gpt_functions_desc import gpt_functions_descriptions
 from .forecast import Forecast
@@ -20,7 +20,8 @@ class ChatFunctions:
             "interpret_a_chart": self.interpret_a_chart,
             "display_major_holders": self.display_major_holders,
             "show_newsPLUSArticles": self.show_newsPLUSArticles,
-            "get_stock_forecast": self.get_stock_forecast
+            "get_stock_forecast": self.get_stock_forecast,
+            "nbp_bonds": self.nbp_bonds
         }
 
     def get_stock_value(self, stock_name, time=None, api_key=None):
@@ -135,6 +136,11 @@ class ChatFunctions:
 
         return json.dumps(forecast_data), url
 
+    def nbp_bonds(self, stock_name, time=None, api_key=None):
+        nbp_scraper = NBP()  # Create an instance of the NBP class
+        bonds_data = nbp_scraper.get_nbpBondsJSON()  # Call the method on the instance
+        print(bonds_data)
+        return bonds_data, None  # Assuming you don't need to return a URL in this case
 
 class ChatConversation(ChatFunctions):
     """ Class dedicated for controling chat GPT integration

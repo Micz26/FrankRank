@@ -20,6 +20,19 @@ gpt_functions_descriptions = [
     {
         "type": "function",
         "function": {
+            "name": "nbp_bonds",
+            "description": "Get informations about bonds, bonds value or any bond related topic",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                },
+            },
+        }
+    },
+
+    {
+        "type": "function",
+        "function": {
             "name": "interpret_a_chart",
             "description": "Interpret a list of given stock (1y or 1m or 1d)",
             "parameters": {
