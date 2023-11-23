@@ -45,16 +45,10 @@
                 </div>
                 {% endif %}
             </div>
-                 {% load socialaccount %}
-                <html>
-                <body>
-                {% if user.is_authenticated %}
-                  <p>Welcome, You are logged in as {{ user.username }</p>
-                {% else %}}
-                  <a href="{% provider_login_url 'google' %}?process=signin&next=/">Login With Google</a>
-                {% endif %}
-                </body>
-                </html>
+             <div class="ui center aligned header">
+                {% load socialaccount %}
+                <a href="{% provider_login_url 'google' %}?process=signin&next=/">Login With Google</a>
+            </div>
             <div class="ui message">
                 <p class="text-base">You do not have an account yet? <a href="/signup">Sign up</a></p>
             </div>

@@ -3,11 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="ec71ae9a-2f44-4276-a7e4-5a950fac4fb9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Chat/templates/signin.html" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/templates/signin.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Chat/templates/signup.html" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/templates/signup.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chat/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FinFrank/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/FinFrank/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +62,14 @@
       <option name="project" value="LOCAL" />
       <updated>1700319349923</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Google login">
+      <created>1700329726881</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1700329726881</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -82,7 +86,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Added function: displayin major holders" />
     <MESSAGE value="Added function: login with google" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added function: login with google" />
+    <MESSAGE value="Google login" />
+    <option name="LAST_COMMIT_MESSAGE" value="Google login" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

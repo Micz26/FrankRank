@@ -69,7 +69,7 @@ def signup(request):
 def api(request):
     username = request.user.username
     if User.objects.filter(username=username).first():
-        return redirect('/')
+        return redirect('signin')
     if request.method == "POST":
         openai_api_key = request.POST['Open ai api key']
 
@@ -80,6 +80,8 @@ def api(request):
     return render(request, 'api.html')
 
 def signin(request):
+    if request.user.username:
+        logout(request)
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
