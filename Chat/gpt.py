@@ -137,10 +137,10 @@ class ChatFunctions:
         return json.dumps(forecast_data), url
 
     def nbp_bonds(self, stock_name, time=None, api_key=None):
-        nbp_scraper = NBP()  # Create an instance of the NBP class
-        bonds_data = nbp_scraper.get_nbpBondsJSON()  # Call the method on the instance
-        print(bonds_data)
-        return bonds_data, None  # Assuming you don't need to return a URL in this case
+        nbp_scraper = NBP()
+        bonds_data = nbp_scraper.get_nbpBondsJSON()
+
+        return bonds_data, None
 
 class ChatConversation(ChatFunctions):
     """ Class dedicated for controling chat GPT integration
