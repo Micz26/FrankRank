@@ -2,6 +2,7 @@
 <p align="center">
 <img src="images/website.png">
 </p>
+
 ## Problem
 
 Finances often depend on subjective opinions, influenced by preconceptions or the potential dishonesty of financial advisors, leading individuals to be exposed to excessive risks due to poor advice.
