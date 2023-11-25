@@ -76,12 +76,20 @@ WSGI_APPLICATION = 'FinFrank.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+        'ENGINE': 'mssql',
+        'HOST': 'XXX.database.windows.net',
+        'PORT': '1433',
+        'NAME': 'XXX',
+        'USER': 'XXX',
+        'PASSWORD': 'XXX',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+            'unicode_results': True,
+        },
+    },
 }
 
-
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 

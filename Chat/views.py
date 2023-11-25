@@ -135,11 +135,11 @@ def make_validMessage(conversation, obj, prompt, chat_ids_names, chat_categories
     
 @login_required(login_url='signin')
 def home(request):
-    api_key = "XXX"
+    api_key = list(Profile.objects.filter(user = request.user).values("openai_api_key"))[0]["openai_api_key"]
     user = request.user.username
     # declaring ChatConversation class for gpt
     conversation = ChatConversation(user, 20, api_key)
-
+    
     obj = ChatInfo.objects.filter(user=user).order_by('-created_at').latest('created_at')
     chat_ids_names = get_chat_ids_names(user, obj.category)
     chat_categories = get_ChatCategories(obj.category)
@@ -176,7 +176,7 @@ def home(request):
 def new_chat(request, category):
     messages_ = []
     user = request.user.username
-    api_key = "XXX"
+    api_key = list(Profile.objects.filter(user = request.user).values("openai_api_key"))[0]["openai_api_key"]
     chat_ids_names = get_chat_ids_names(user, category)
     conversation = ChatConversation(user, 20, api_key)
     chat_categories = get_ChatCategories(category)
@@ -207,10 +207,9 @@ def new_chat(request, category):
 
 @login_required(login_url='signin')
 def chat(request, pk):
+    api_key = list(Profile.objects.filter(user = request.user).values("openai_api_key"))[0]["openai_api_key"]
     obj = ChatInfo.objects.get(id_chat=pk)
-    api_key = "XXX"
     user = request.user.username
-
     chat_ids_names = get_chat_ids_names(user, obj.category)
     conversation = ChatConversation(user, 20, api_key)
     chat_messages = ChatMessage.objects.filter(id_chat=obj.id_chat).order_by('created_at')

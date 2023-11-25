@@ -6,3 +6,5 @@ uuid
 pyodbc
 mssql-django
 django-mssql-backend
+djangorestframework
+django-cors-headers
