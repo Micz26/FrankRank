@@ -3,8 +3,8 @@ import json
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from .scrapers import Yahoo, NBP
-from .blob import uploadChartToBlobStorage
+from Chat.scrapers import Yahoo, NBP
+from Chat.blob import uploadChartToBlobStorage
 from .gpt_functions_desc import gpt_functions_descriptions
 from .forecast import Forecast
 from openai import OpenAI
@@ -13,7 +13,7 @@ from wordcloud import WordCloud
 
 
 class ChatFunctions:
-    def __init__(self):
+    def __init__(self, api_key):
         self.functions = gpt_functions_descriptions
         self.available_functions = {
             "get_stock_value": self.get_stock_value,
@@ -23,13 +23,14 @@ class ChatFunctions:
             "get_stock_forecast": self.get_stock_forecast,
             "nbp_bonds": self.nbp_bonds
         }
+        self.client = OpenAI(api_key=api_key)
 
-    def get_stock_value(self, stock_name, time=None, api_key=None):
+    def get_stock_value(self, stock_name, time=None):
         stock_data = yf.Ticker(stock_name).history(period="1d")["Close"][0]
 
         return json.dumps(stock_data), None
 
-    def interpret_a_chart(self, stock_name, time, api_key=None):
+    def interpret_a_chart(self, stock_name, time):
         stock_data = yf.Ticker(stock_name).history(period=time)
         plt.figure(figsize=(14, 5))
         fig = sns.lineplot(data=stock_data, x="Date", y='Close')
@@ -40,7 +41,7 @@ class ChatFunctions:
 
         return json.dumps(stock_data), url
 
-    def makeWordCloud(self, text: str, api_key=None):
+    def makeWordCloud(self, text: str):
         """ Makes and uploades to blob wordcloud 
             Returns : 
                 url : blob storage url of figure
@@ -53,7 +54,7 @@ class ChatFunctions:
         url = uploadChartToBlobStorage(fig, self.userName)
         return url
 
-    def show_newsPLUSArticles(self, stock_name, time=None, api_key=None):
+    def show_newsPLUSArticles(self, stock_name, time=None):
         news_data = yf.Ticker(stock_name).news
         filtered_news = [article for article in news_data if stock_name in article['relatedTickers']]
 
@@ -66,10 +67,10 @@ class ChatFunctions:
             scrap = Yahoo(link)
             article_data = scrap.get_soupTextYahoo()
 
-            client = OpenAI(api_key=api_key)
+            #client = OpenAI(api_key=api_key)
             prompt = f"Create at least 4 bullet points sentences for this article: '{article_data}'. " \
                      f"IMPORTANT: Keep important informations unchanged!"
-            response_bp = client.chat.completions.create(
+            response_bp = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are ChatGPT bullet points writer, who is consistent and smart"},
@@ -100,7 +101,7 @@ class ChatFunctions:
 
         return fig1
 
-    def display_major_holders(self, stock_name, time, api_key=None):
+    def display_major_holders(self, stock_name, time):
         ticker = yf.Ticker(stock_name)
         institutional_holders = ticker.institutional_holders
         mutualfund_holders = ticker.mutualfund_holders
@@ -117,7 +118,7 @@ class ChatFunctions:
         json_list = json.loads(json.dumps(list(df.T.to_dict().values())))
         return json.dumps(json_list), url
 
-    def get_stock_forecast(self, stock_name, time=None, api_key=None):
+    def get_stock_forecast(self, stock_name, time=None):
         forecast_model = Forecast(stock_name)
         forecast_result = forecast_model.get_LagRegYearStockForecast()
         predicted_values = forecast_result["pred"].tolist()
@@ -136,7 +137,7 @@ class ChatFunctions:
 
         return json.dumps(forecast_data), url
 
-    def nbp_bonds(self, stock_name, time=None, api_key=None):
+    def nbp_bonds(self, stock_name, time=None):
         nbp_scraper = NBP()
         bonds_data = nbp_scraper.get_nbpBondsJSON()
 
@@ -154,15 +155,13 @@ class ChatConversation(ChatFunctions):
     """
 
     def __init__(self, name, age, api_key):
-        super().__init__()
+        super().__init__(api_key)
         self.userName = name
         self.age = age
         self.messages = [{"role": "assistant", "content":
             f"You are a conservative financial advisor to user named {self.userName} of age {self.age}. You want to help him maximize investment returns."}]
         self.htmlChart = ""
-        self.client = OpenAI(api_key=api_key)
         self.messagesJSON = []
-        self.urlList = [None]  # might result in an error; TBR in case of an error
         self.api_key = api_key
         self.model = "gpt-3.5-turbo-1106"
 
@@ -233,7 +232,7 @@ class ChatConversation(ChatFunctions):
                 function_response = function_to_call(
                     stock_name=function_args.get("chosen_stock"),
                     time=function_args.get("time"),
-                    api_key=function_args.get("api_key")
+                    #api_key=function_args.get("api_key")
                 )
 
                 res, url = function_response
@@ -270,7 +269,6 @@ class ChatConversation(ChatFunctions):
                 row["prompt"] = item["content"]
 
             if i == 2:
-                row["url"] = self.urlList[-1]
                 self.messagesJSON.append(row)
                 row = {}
                 i = 0

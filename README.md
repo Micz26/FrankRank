@@ -1,20 +1,14 @@
 # FinFrank
 cd FinFrank (2 razy /FinFrank/FinFrank)
+## About The Project
 
+
+```sh
 python manage.py makemigrations
-
+```
+```sh
 python manage.py migrate
-
+```
+```sh
 python manage.py runserver
-
-(opcjonalnie)
-
-python manage.py createsuperuser
-
-BAZADANYCH 
-pip install pyodbc
-pip install mssql-django
-
-python -m pip install azure-storage-blob
-python -m pip install azure-storage     
-python -m pip install kaleido 
+```

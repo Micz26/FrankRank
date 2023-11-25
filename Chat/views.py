@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 from urllib.parse import quote
 import openai
 
-from .gpt import ChatConversation
+from Chat.GPT.gpt import ChatConversation
 from .models import Profile, ChatInfo, UserInfo, ChatMessage
 import json
 

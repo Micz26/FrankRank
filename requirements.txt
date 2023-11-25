@@ -1,0 +1,8 @@
+django
+openai
+azure-storage-blob
+bcrypt
+uuid
+pyodbc
+mssql-django
+django-mssql-backend
