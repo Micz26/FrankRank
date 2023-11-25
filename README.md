@@ -1,5 +1,7 @@
 # FrankRank - Financial Advisory Chatbot
-
+<p align="center">
+<img src="images/website.png">
+</p>
 ## Problem
 
 Finances often depend on subjective opinions, influenced by preconceptions or the potential dishonesty of financial advisors, leading individuals to be exposed to excessive risks due to poor advice.
@@ -18,6 +20,10 @@ FrankRank is a Python-based web application that addresses this issue by utilizi
     - Format the latest news on the stock exchange.
     - Display companies' biggest shareholders.
 - **Forecast Function:** We developed a function for a simple forecast of the company's price.
+
+<p align="center">
+<img src="images/webgif.gif" alt="Video GIF" width="800" height="450">
+</p>
 
 ## Technologies Used
 
