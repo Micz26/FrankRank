@@ -13,14 +13,16 @@ FrankRank is a Python-based web application that addresses this issue by utilizi
 
 ## What did we implement?
 
-- **Web Scraping:** The application performs web scraping to gather information from financial magazines.
 - **Prompt Engineering:** OpenAI API is utilized for prompt engineering.
 - **Web Development:** We created a website using the Django framework that stores customer data and acts as an interaction intermediary.
 - **Stock Analysis Functions:**
     - Determine the company's trend on the stock exchange.
     - Format the latest news on the stock exchange.
     - Display companies' biggest shareholders.
-- **Forecast Function:** We developed a function for a simple forecast of the company's price.
+- **Forecast Function:** We developed a function for a forecast of the company's price.
+- **Login System:**: Enhances user engagement by tailoring the chat experience based on signup responses. Customers can answer specific questions during signup, thus influencing the chat system's responses for a personalized and intuitive platform
+- **Yahoo Finance:** Utilizing Yahoo Finance, we can provide real-time data that can be leveraged by the chat system in accordance with user requirements.
+- **Web Scraping:** The application performs web scraping to gather information from financial magazines.
 
 <p align="center">
 <img src="images/webgif.gif" alt="Video GIF" width="800" height="450">
