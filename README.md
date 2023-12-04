@@ -9,7 +9,9 @@ Finances often depend on subjective opinions, influenced by preconceptions or th
 
 ## Solution
 
-FrankRank is a Python-based web application that addresses this issue by utilizing a chatbot, specifically ChatGPT. Through prompt generation and function calling, the chatbot provides objective opinions on finances, eliminating biases and emotions associated with human decision-making.
+FrankRank - Python-based web application that addresses this issue by utilizing a chatbot, specifically ChatGPT. 
+
+FrankRank stands as a Python-based web application designed to revolutionize financial decision-making through the implementation of an objective chatbot powered by ChatGPT. This innovative approach aims to mitigate biases and emotional influences inherent in human decision-making processes related to finances. Application boasts a robustly implemented backend logic akin to ChatGPT, integrating sophisticated CRUD (Create, Read, Update, Delete) functionalities seamlessly orchestrated through Django's powerful ORM (Object-Relational Mapping) framework.
 
 ## What did we implement?
 
@@ -27,6 +29,26 @@ FrankRank is a Python-based web application that addresses this issue by utilizi
 <p align="center">
 <img src="images/webgif.gif" alt="Video GIF" width="800" height="450">
 </p>
+
+## Backend Overwiev
+- **User Authentication and Authorization:**
+    - Signup and login views enabling user registration and login with username, email, password, and OpenAI API key.
+    - "Login with Google" option for streamlined access using the OpenAI API key.
+- **User Settings Customization:**
+    - Settings page for user-specific preferences like investments, sectors, risk level, and other parameters to fine-tune the GPT-based advice system.
+- **Chat Management:**
+    - Categorized chats covering personal finance, investments, insurance, and car insurance.
+    - Dropdown menu for users to switch between chat categories.
+    - Record of past chats, allowing users to view previous conversations.
+    - Access to unique URLs for individual chat sessions for easy retrieval and continuation of discussions.
+    - Ability for users to create new chats within the current category for initiating fresh discussions related to the chosen financial aspect.
+- **Logout Functionality:**
+    - Secure logout to terminate user sessions and maintain account security.
+- **Integration with OpenAI API:**
+    - Utilization of the OpenAI API to power the chatbot functionality for objective financial advice generation.
+- **Backend Navigation and Redirection:**
+    - Redirects from signup to settings page for initial customization.
+    - Seamless user experience by categorizing and displaying only chats relevant to the selected category.
 
 ## Technologies Used
 
